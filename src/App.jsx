@@ -1,6 +1,11 @@
-import Navbar from "./Component/Navbar";
-import ThemeToggle from "./Component/ThemeToggle";
-import Home from "./Pages/Home";
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
+import Skills from "./components/Skills";
+import About from "./components/About";
+import Projects from "./components/Projects";
+import Contact from "./components/Contact";
+import Footer from "./components/Footer";
+import ThemeToggle from "./components/ThemeToggle";
 import { useState } from "react";
 
 function App() {
@@ -10,7 +15,12 @@ function App() {
     <div className={darkMode ? "dark" : ""}>
       <Navbar />
       <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
-      <Home />
+      <Hero />
+      <Skills />
+      <About />
+      <Projects />
+      <Contact />
+      <Footer />
     </div>
   );
 }
