@@ -9,15 +9,15 @@ import ThemeToggle from "./components/ThemeToggle";
 import { useState } from "react";
 
 function App() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
 
   return (
     <div className={darkMode ? "dark" : ""}>
       <Navbar />
       <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
       <Hero />
-      <Skills />
       <About />
+      <Skills />
       <Projects />
       <Contact />
       <Footer />
