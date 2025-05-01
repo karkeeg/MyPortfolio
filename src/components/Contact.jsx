@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin } from "lucide-react";
-import { FaGithub, FaInstagram, FaLinkedin, FaTwitter } from "react-icons/fa";
+import { FaGithub, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import emailjs from "emailjs-com";
