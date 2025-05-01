@@ -1,5 +1,7 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
 import { Github, ExternalLink } from "lucide-react";
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 import airline from "../assets/project/airline.png";
 import countries from "../assets/project/countries.png";
 import ecommerce from "../assets/project/ecommerce.png";
@@ -45,6 +47,8 @@ const projects = [
 ];
 
 const Projects = () => {
+  const [openIndex, setOpenIndex] = useState(-1);
+
   return (
     <section
       id="projects"
@@ -53,20 +57,18 @@ const Projects = () => {
       <h2 className="text-5xl font-extrabold text-center mb-16 text-gray-800 dark:text-white">
         My Projects
       </h2>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-7xl mx-auto px-6">
         {projects.map((project, index) => (
-          <motion.div
+          <div
             key={index}
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: index * 0.2 }}
-            className="bg-white/40 dark:bg-gray-700/40 backdrop-blur-md p-6 rounded-2xl shadow-lg transition-all cursor-pointer border border-white/30 dark:border-gray-600/30 flex flex-col space-y-4"
+            className="bg-white/40 dark:bg-gray-700/40 backdrop-blur-md p-6 rounded-2xl shadow-lg hover:shadow-purple-400/30 dark:hover:shadow-purple-300/30 transition-all cursor-pointer border border-white/30 dark:border-gray-600/30 flex flex-col space-y-4"
           >
             <img
               src={project.image}
               alt={project.title}
-              className="rounded-xl object-cover h-64 w-full"
+              className="rounded-xl object-cover h-72 w-full cursor-pointer"
+              onClick={() => setOpenIndex(index)}
             />
             <div className="flex-1">
               <h3 className="text-3xl font-bold text-purple-700 dark:text-purple-400 mb-2">
@@ -90,6 +92,7 @@ const Projects = () => {
             </div>
 
             {/* Github + Live Links */}
+            {/* Github + Live Links */}
             <div className="flex gap-4">
               <a
                 href={project.github}
@@ -110,9 +113,23 @@ const Projects = () => {
                 Live
               </a>
             </div>
-          </motion.div>
+
+          </div>
         ))}
       </div>
+
+      {/* Lightbox Component */}
+      {openIndex >= 0 && (
+        <Lightbox
+          open={openIndex >= 0}
+          close={() => setOpenIndex(-1)}
+          slides={projects.map((project) => ({
+            src: project.image,
+            alt: project.title,
+          }))}
+          index={openIndex}
+        />
+      )}
     </section>
   );
 };
