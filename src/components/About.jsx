@@ -5,7 +5,7 @@ const About = () => {
   return (
     <section
       id="about"
-      className="min-h-screen flex flex-col justify-center items-center text-center px-6 bg-white dark:bg-gray-900"
+      className="py-12 flex flex-col justify-center items-center text-center px-6 bg-white dark:bg-gray-900"
     >
       <motion.div
         initial={{ opacity: 0, y: 50 }}

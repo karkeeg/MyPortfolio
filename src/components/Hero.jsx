@@ -2,8 +2,7 @@ import { motion } from "framer-motion";
 import { Typewriter } from "react-simple-typewriter";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import background from "../assets/codeImage.png";
-import bibek from '../assets/image.png'
-
+import bibek from "../assets/image.png";
 
 const Hero = () => {
   return (
@@ -32,7 +31,8 @@ const Hero = () => {
           <p className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 mb-6 h-8">
             <Typewriter
               words={[
-                "Frontend Developer",
+                "Full-Stack Developer",
+                "MERN Stack Developer",
                 "React Enthusiast",
                 "Creative Coder",
                 "UI/UX Lover",
@@ -48,9 +48,9 @@ const Hero = () => {
 
           {/* Subheading */}
           <p className="text-md md:text-lg text-gray-600 dark:text-gray-400 mb-8">
-            I build beautiful and functional websites with a focus on performance
-            and seamless user experience. Let's bring ideas to life with code and
-            creativity!
+            I build beautiful and functional websites with a focus on
+            performance and seamless user experience. Let's bring ideas to life
+            with code and creativity!
           </p>
 
           {/* CTA Button */}
@@ -96,7 +96,7 @@ const Hero = () => {
 
           {/* Photo */}
           <img
-            src={bibek}// <-- Your image path
+            src={bibek} // <-- Your image path
             alt="Bibek Karki"
             className="w-48 h-48 md:w-72 md:h-72 rounded-full object-cover border-white dark:border-gray-800 relative z-10 shadow-lg"
           />

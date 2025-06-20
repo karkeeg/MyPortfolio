@@ -52,7 +52,7 @@ const Projects = () => {
   return (
     <section
       id="projects"
-      className="py-20 bg-gradient-to-b from-purple-100 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-700"
+      className="py-10 bg-gradient-to-b from-purple-100 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-700"
     >
       <h2 className="text-5xl font-extrabold text-center mb-16 text-gray-800 dark:text-white">
         My Projects
