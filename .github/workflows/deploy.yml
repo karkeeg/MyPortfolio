@@ -23,16 +23,13 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
-    - name: Copy index.html to public
-      run: cp index.html public/index.html
-      
     - name: Verify public files
       run: |
         echo "📁 Public directory contents:"
         ls -la public/
         echo ""
         echo "📄 Checking required files:"
-        for file in favicon.ico logo192.png logo512.png manifest.json robots.txt; do
+        for file in index.html favicon.ico logo192.png logo512.png manifest.json robots.txt; do
           if [ -f "public/$file" ]; then
             echo "✅ $file exists"
           else
@@ -42,6 +39,20 @@ jobs:
       
     - name: Build
       run: npm run build
+      
+    - name: Verify build output
+      run: |
+        echo "📁 Build directory contents:"
+        ls -la build/
+        echo ""
+        echo "📄 Checking build files:"
+        for file in index.html static; do
+          if [ -f "build/$file" ] || [ -d "build/$file" ]; then
+            echo "✅ $file exists"
+          else
+            echo "❌ $file missing"
+          fi
+        done
       
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
