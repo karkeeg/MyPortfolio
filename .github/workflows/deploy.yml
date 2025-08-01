@@ -26,6 +26,20 @@ jobs:
     - name: Copy index.html to public
       run: cp index.html public/index.html
       
+    - name: Verify public files
+      run: |
+        echo "📁 Public directory contents:"
+        ls -la public/
+        echo ""
+        echo "📄 Checking required files:"
+        for file in favicon.ico logo192.png logo512.png manifest.json robots.txt; do
+          if [ -f "public/$file" ]; then
+            echo "✅ $file exists"
+          else
+            echo "❌ $file missing"
+          fi
+        done
+      
     - name: Build
       run: npm run build
       
