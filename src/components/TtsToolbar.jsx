@@ -88,13 +88,123 @@ export default function AccessibilityToolbar() {
   const readPage = useCallback(() => {
     removeHighlight();
 
-    // 1. Get text content
+    // 1. Prefer scoped main content (#app-content) if present
+    const appContent = document.getElementById("app-content") || document.body;
+
+    // Also remove toolbar if it's accidentally included in a cloned DOM
     const bodyClone = document.body.cloneNode(true);
     const toolbarClone = bodyClone.querySelector(
       "[data-accessibility-toolbar]",
     );
     if (toolbarClone) toolbarClone.remove();
-  }, []);
+
+    // Gather readable elements (prefer semantic blocks)
+    const nodeSelector = "p, li, h1, h2, h3, h4, h5, h6, span, div";
+    const elements = Array.from(
+      appContent.querySelectorAll(nodeSelector),
+    ).filter(
+      (el) =>
+        el.closest("[data-accessibility-toolbar]") === null &&
+        el.innerText &&
+        el.innerText.trim().length > 0 &&
+        window.getComputedStyle(el).display !== "none",
+    );
+
+    // Build text array; fallback to full app text if nothing structured found
+    const texts = elements.length
+      ? elements.map((el) => el.innerText.trim())
+      : [appContent.innerText.trim()];
+
+    const separator = "\n\n";
+    const fullText = texts.join(separator).trim();
+    if (!fullText) return;
+
+    // Create offsets map to map global char index -> element
+    const offsets = [];
+    let cursor = 0;
+    for (let i = 0; i < texts.length; i++) {
+      const t = texts[i] || "";
+      offsets.push({
+        start: cursor,
+        end: cursor + t.length,
+        el: elements[i] || appContent,
+      });
+      cursor += t.length + separator.length;
+    }
+
+    // Create an utterance and configure voice/rate
+    const utterance = new SpeechSynthesisUtterance(fullText);
+    utterance.rate = speed;
+    utterance.pitch = 1.0;
+    const voice = getBestVoice();
+    if (voice) utterance.voice = voice;
+
+    // Highlight text as boundaries come in
+    utterance.onboundary = (event) => {
+      if (typeof event.charIndex !== "number") return;
+      const idx = event.charIndex;
+      const length = event.charLength || 1;
+
+      // Find the element that contains this character index
+      const match = offsets.find((o) => idx >= o.start && idx < o.end);
+      if (!match) return;
+
+      const localStart = Math.max(0, idx - match.start);
+      const localEnd = Math.min(match.end - match.start, localStart + length);
+
+      // Remove any previous highlights
+      removeHighlight();
+
+      try {
+        // Walk text nodes within the matched element and wrap the matching substring(s)
+        const walker = document.createTreeWalker(
+          match.el,
+          NodeFilter.SHOW_TEXT,
+          null,
+          false,
+        );
+        let currentIndex = 0;
+        while (walker.nextNode()) {
+          const node = walker.currentNode;
+          const nodeText = node.textContent || "";
+          const nodeStart = currentIndex;
+          const nodeEnd = currentIndex + nodeText.length;
+
+          if (nodeEnd <= localStart) {
+            currentIndex = nodeEnd;
+            continue;
+          }
+          if (nodeStart >= localEnd) break;
+
+          const wrapStart = Math.max(0, localStart - nodeStart);
+          const wrapEnd = Math.min(nodeText.length, localEnd - nodeStart);
+
+          const range = document.createRange();
+          range.setStart(node, wrapStart);
+          range.setEnd(node, wrapEnd);
+          const span = document.createElement("span");
+          span.className = "tts-highlight";
+          span.style.background = "rgba(250,204,21,0.33)";
+          span.style.borderRadius = "4px";
+          range.surroundContents(span);
+
+          currentIndex = nodeEnd;
+        }
+      } catch (e) {
+        // Ignore DOM manipulation failures for complex markup
+      }
+    };
+
+    utterance.onend = () => {
+      removeHighlight();
+      setIsPaused(false);
+    };
+
+    // Start speaking
+    synth.cancel();
+    synth.speak(utterance);
+    setIsPaused(false);
+  }, [getBestVoice, speed]);
 
   const handleCommand = useCallback(
     (cmd) => {
