@@ -110,6 +110,80 @@ export default function AccessibilityToolbar() {
     [readPage],
   );
 
+  const pauseResume = () => {
+    if (synth.paused) {
+      synth.resume();
+      setIsPaused(false);
+    } else {
+      synth.pause();
+      setIsPaused(true);
+    }
+  };
+
+  const stopListening = () => {
+    if (recognition && isListening) {
+      try {
+        recognition.stop();
+      } catch (e) {
+        // Recognition might already be stopped
+      }
+    }
+    setIsListening(false);
+  };
+
+  const resetAll = () => {
+    // Cancel any ongoing speech
+    synth.cancel();
+
+    // Remove text highlighting
+    removeHighlight();
+
+    // Stop voice recognition
+    stopListening();
+
+    // Reset all states
+    setIsListening(false);
+    setIsPaused(false);
+    setSpeed(1.0);
+    setVoiceGender("male");
+    setClickToSpeak(false);
+
+    // Reset font settings
+    setFontSize(16);
+    setDyslexiaFont(false);
+    setSelectedFont("");
+
+    // Close all panels
+    setTtsPanelOpen(false);
+    setFontPanelOpen(false);
+  };
+
+  const startListening = () => {
+    if (!recognition) return;
+    recognition.start();
+    setIsListening(true);
+  };
+
+  const toggleTtsPanel = () => {
+    setTtsPanelOpen(!ttsPanelOpen);
+  };
+
+  const toggleFontPanel = () => {
+    setFontPanelOpen(!fontPanelOpen);
+  };
+
+  const increaseFontSize = () => {
+    setFontSize((prev) => Math.min(prev + 2, 64));
+  };
+
+  const decreaseFontSize = () => {
+    setFontSize((prev) => Math.max(prev - 2, 12));
+  };
+
+  const resetFontSize = () => {
+    setFontSize(16);
+  };
+
   useEffect(() => {
     if (!SpeechRecognition) return;
 
@@ -225,80 +299,6 @@ export default function AccessibilityToolbar() {
       }
     };
   }, [clickToSpeak, speakText]);
-  const pauseResume = () => {
-    if (synth.paused) {
-      synth.resume();
-      setIsPaused(false);
-    } else {
-      synth.pause();
-      setIsPaused(true);
-    }
-  };
-
-  const stopListening = () => {
-    if (recognition && isListening) {
-      try {
-        recognition.stop();
-      } catch (e) {
-        // Recognition might already be stopped
-      }
-    }
-    setIsListening(false);
-  };
-
-  const resetAll = () => {
-    // Cancel any ongoing speech
-    synth.cancel();
-
-    // Remove text highlighting
-    removeHighlight();
-
-    // Stop voice recognition
-    stopListening();
-
-    // Reset all states
-    setIsListening(false);
-    setIsPaused(false);
-    setSpeed(1.0);
-    setVoiceGender("male");
-    setClickToSpeak(false);
-
-    // Reset font settings
-    setFontSize(16);
-    setDyslexiaFont(false);
-    setSelectedFont("");
-
-    // Close all panels
-    setTtsPanelOpen(false);
-    setFontPanelOpen(false);
-  };
-
-  const startListening = () => {
-    if (!recognition) return;
-    recognition.start();
-    setIsListening(true);
-  };
-
-
-  const toggleTtsPanel = () => {
-    setTtsPanelOpen(!ttsPanelOpen);
-  };
-
-  const toggleFontPanel = () => {
-    setFontPanelOpen(!fontPanelOpen);
-  };
-
-  const increaseFontSize = () => {
-    setFontSize((prev) => Math.min(prev + 2, 64));
-  };
-
-  const decreaseFontSize = () => {
-    setFontSize((prev) => Math.max(prev - 2, 12));
-  };
-
-  const resetFontSize = () => {
-    setFontSize(16);
-  };
 
   return (
     <div data-accessibility-toolbar className="accessibility-toolbar">
