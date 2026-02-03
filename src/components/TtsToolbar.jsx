@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 const synth = window.speechSynthesis;
 const SpeechRecognition =
@@ -11,22 +11,30 @@ export default function AccessibilityToolbar() {
   const [isPaused, setIsPaused] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [speed, setSpeed] = useState(1.0);
-  const [recognition, setRecognition] = useState(null);
+  const recognitionRef = useRef(null);
+  const handleCommandRef = useRef(null);
   const [voiceGender, setVoiceGender] = useState("male");
   const [fontSize, setFontSize] = useState(16);
   const [dyslexiaFont, setDyslexiaFont] = useState(false);
   const [selectedFont, setSelectedFont] = useState("");
   const [clickToSpeak, setClickToSpeak] = useState(false);
+  const utteranceRef = useRef(null);
+  const speechIdRef = useRef(0);
 
-  const removeHighlight = () => {
+  const removeHighlight = useCallback(() => {
     const highlights = document.querySelectorAll(".tts-highlight");
-    highlights.forEach((highlight) => {
-      const parent = highlight.parentNode;
-      const text = document.createTextNode(highlight.textContent);
-      parent.replaceChild(text, highlight);
-      parent.normalize();
+    highlights.forEach((span) => {
+      const parent = span.parentNode;
+      if (parent) {
+        // Move all children out of the span before removing it
+        while (span.firstChild) {
+          parent.insertBefore(span.firstChild, span);
+        }
+        parent.removeChild(span);
+        parent.normalize();
+      }
     });
-  };
+  }, []);
 
   const getBestVoice = useCallback(() => {
     const voices = synth.getVoices();
@@ -62,149 +70,136 @@ export default function AccessibilityToolbar() {
   }, [voiceGender]);
 
   const speakText = useCallback(
-    (text, onBoundary = null) => {
-      synth.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = speed;
-      utterance.pitch = 1.0;
-      const voice = getBestVoice();
-      if (voice) utterance.voice = voice;
-
-      if (onBoundary) {
-        utterance.onboundary = onBoundary;
+    (input) => {
+      // Input can be a string or an array of { text, el }
+      let chunks = [];
+      if (typeof input === "string") {
+        chunks = input
+          .split(/[.!?\n]+/)
+          .map((t) => ({ text: t.trim() }))
+          .filter((c) => c.text.length > 2);
+      } else if (Array.isArray(input)) {
+        chunks = input.filter((c) => c.text && c.text.trim().length > 2);
       }
 
-      utterance.onend = () => {
-        removeHighlight();
-        setIsPaused(false);
+      if (chunks.length === 0) return;
+
+      synth.cancel();
+      synth.resume();
+      const thisSpeechId = ++speechIdRef.current;
+      let currentChunkIndex = 0;
+
+      const speakNextChunk = () => {
+        if (thisSpeechId !== speechIdRef.current) return;
+        if (isPaused) return; // Wait until resumed
+
+        if (currentChunkIndex >= chunks.length) {
+          removeHighlight();
+          setIsPaused(false);
+          return;
+        }
+
+        const chunk = chunks[currentChunkIndex];
+        const utterance = new SpeechSynthesisUtterance(chunk.text);
+        utterance.rate = speed;
+        utterance.pitch = 1.0;
+        const voice = getBestVoice();
+        if (voice) utterance.voice = voice;
+
+        utterance.onstart = () => {
+          if (thisSpeechId !== speechIdRef.current) return;
+          removeHighlight();
+          if (chunk.el) {
+            // Wrap inner content in a highlight span to keep it "inline"
+            const span = document.createElement("span");
+            span.className = "tts-highlight";
+            while (chunk.el.firstChild) {
+              span.appendChild(chunk.el.firstChild);
+            }
+            chunk.el.appendChild(span);
+          }
+        };
+
+        utterance.onend = () => {
+          if (thisSpeechId !== speechIdRef.current) return;
+          currentChunkIndex++;
+          speakNextChunk();
+        };
+
+        utterance.onerror = (event) => {
+          // console.error("TTS Chunk Error:", event);
+          if (thisSpeechId !== speechIdRef.current) return;
+          currentChunkIndex++;
+          speakNextChunk();
+        };
+
+        utteranceRef.current = utterance;
+        synth.speak(utterance);
       };
 
-      synth.speak(utterance);
       setIsPaused(false);
+      setTimeout(() => {
+        if (thisSpeechId !== speechIdRef.current) return;
+        synth.resume();
+        speakNextChunk();
+      }, 100);
     },
-    [speed, getBestVoice],
+    [speed, getBestVoice, isPaused, removeHighlight],
   );
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current && isListening) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {
+        // Recognition might already be stopped
+      }
+    }
+    setIsListening(false);
+  }, [isListening]);
 
   const readPage = useCallback(() => {
     removeHighlight();
+    stopListening();
 
-    // 1. Prefer scoped main content (#app-content) if present
-    const appContent = document.getElementById("app-content") || document.body;
+    const appContent = document.getElementById("app-content");
+    if (!appContent) return;
 
-    // Also remove toolbar if it's accidentally included in a cloned DOM
-    const bodyClone = document.body.cloneNode(true);
-    const toolbarClone = bodyClone.querySelector(
-      "[data-accessibility-toolbar]",
-    );
-    if (toolbarClone) toolbarClone.remove();
+    // Gather semantic blocks including interactive elements
+    const selectors = "h1, h2, h3, h4, h5, h6, p, li, button, a";
+    const allElements = Array.from(appContent.querySelectorAll(selectors));
+    
+    const elements = allElements.filter((el) => {
+      // Skip the toolbar itself
+      if (el.closest("[data-accessibility-toolbar]")) return false;
 
-    // Gather readable elements (prefer semantic blocks)
-    const nodeSelector = "p, li, h1, h2, h3, h4, h5, h6, span, div";
-    const elements = Array.from(
-      appContent.querySelectorAll(nodeSelector),
-    ).filter(
-      (el) =>
-        el.closest("[data-accessibility-toolbar]") === null &&
-        el.innerText &&
-        el.innerText.trim().length > 0 &&
-        window.getComputedStyle(el).display !== "none",
-    );
+      const style = window.getComputedStyle(el);
+      const isVisible = style.display !== "none" && style.visibility !== "hidden";
+      if (!isVisible) return false;
 
-    // Build text array; fallback to full app text if nothing structured found
-    const texts = elements.length
-      ? elements.map((el) => el.innerText.trim())
-      : [appContent.innerText.trim()];
+      // Get text: prioritize aria-label for icon buttons
+      const text = el.getAttribute("aria-label") || el.innerText.trim();
+      if (text.length === 0) return false;
 
-    const separator = "\n\n";
-    const fullText = texts.join(separator).trim();
-    if (!fullText) return;
+      // Check if this element contains any other element from our selector list
+      // to avoid duplicate reading.
+      const hasChildElement = allElements.some(other => 
+        other !== el && el.contains(other)
+      );
+      
+      return !hasChildElement;
+    });
 
-    // Create offsets map to map global char index -> element
-    const offsets = [];
-    let cursor = 0;
-    for (let i = 0; i < texts.length; i++) {
-      const t = texts[i] || "";
-      offsets.push({
-        start: cursor,
-        end: cursor + t.length,
-        el: elements[i] || appContent,
-      });
-      cursor += t.length + separator.length;
+    if (elements.length > 0) {
+      const chunks = elements.map((el) => ({
+        text: el.getAttribute("aria-label") || el.innerText.trim(),
+        el: el,
+      }));
+      speakText(chunks);
+    } else {
+      speakText(appContent.innerText.trim());
     }
-
-    // Create an utterance and configure voice/rate
-    const utterance = new SpeechSynthesisUtterance(fullText);
-    utterance.rate = speed;
-    utterance.pitch = 1.0;
-    const voice = getBestVoice();
-    if (voice) utterance.voice = voice;
-
-    // Highlight text as boundaries come in
-    utterance.onboundary = (event) => {
-      if (typeof event.charIndex !== "number") return;
-      const idx = event.charIndex;
-      const length = event.charLength || 1;
-
-      // Find the element that contains this character index
-      const match = offsets.find((o) => idx >= o.start && idx < o.end);
-      if (!match) return;
-
-      const localStart = Math.max(0, idx - match.start);
-      const localEnd = Math.min(match.end - match.start, localStart + length);
-
-      // Remove any previous highlights
-      removeHighlight();
-
-      try {
-        // Walk text nodes within the matched element and wrap the matching substring(s)
-        const walker = document.createTreeWalker(
-          match.el,
-          NodeFilter.SHOW_TEXT,
-          null,
-          false,
-        );
-        let currentIndex = 0;
-        while (walker.nextNode()) {
-          const node = walker.currentNode;
-          const nodeText = node.textContent || "";
-          const nodeStart = currentIndex;
-          const nodeEnd = currentIndex + nodeText.length;
-
-          if (nodeEnd <= localStart) {
-            currentIndex = nodeEnd;
-            continue;
-          }
-          if (nodeStart >= localEnd) break;
-
-          const wrapStart = Math.max(0, localStart - nodeStart);
-          const wrapEnd = Math.min(nodeText.length, localEnd - nodeStart);
-
-          const range = document.createRange();
-          range.setStart(node, wrapStart);
-          range.setEnd(node, wrapEnd);
-          const span = document.createElement("span");
-          span.className = "tts-highlight";
-          span.style.background = "rgba(250,204,21,0.33)";
-          span.style.borderRadius = "4px";
-          range.surroundContents(span);
-
-          currentIndex = nodeEnd;
-        }
-      } catch (e) {
-        // Ignore DOM manipulation failures for complex markup
-      }
-    };
-
-    utterance.onend = () => {
-      removeHighlight();
-      setIsPaused(false);
-    };
-
-    // Start speaking
-    synth.cancel();
-    synth.speak(utterance);
-    setIsPaused(false);
-  }, [getBestVoice, speed]);
+  }, [speakText, stopListening, removeHighlight]);
 
   const handleCommand = useCallback(
     (cmd) => {
@@ -221,28 +216,18 @@ export default function AccessibilityToolbar() {
   );
 
   const pauseResume = () => {
-    if (synth.paused) {
-      synth.resume();
-      setIsPaused(false);
-    } else {
+    if (synth.speaking && !synth.paused) {
       synth.pause();
       setIsPaused(true);
+    } else if (synth.paused || isPaused) {
+      synth.resume();
+      setIsPaused(false);
     }
-  };
-
-  const stopListening = () => {
-    if (recognition && isListening) {
-      try {
-        recognition.stop();
-      } catch (e) {
-        // Recognition might already be stopped
-      }
-    }
-    setIsListening(false);
   };
 
   const resetAll = () => {
-    // Cancel any ongoing speech
+    // Invalidate any ongoing speech loops
+    speechIdRef.current++;
     synth.cancel();
 
     // Remove text highlighting
@@ -268,12 +253,6 @@ export default function AccessibilityToolbar() {
     setFontPanelOpen(false);
   };
 
-  const startListening = () => {
-    if (!recognition) return;
-    recognition.start();
-    setIsListening(true);
-  };
-
   const toggleTtsPanel = () => {
     setTtsPanelOpen(!ttsPanelOpen);
   };
@@ -293,6 +272,20 @@ export default function AccessibilityToolbar() {
   const resetFontSize = () => {
     setFontSize(16);
   };
+  const startListening = () => {
+    if (!recognitionRef.current) return;
+    try {
+      recognitionRef.current.start();
+      setIsListening(true);
+    } catch (e) {
+      console.error("Speech Recognition start error:", e);
+    }
+  };
+
+  // Keep handleCommandRef up to date
+  useEffect(() => {
+    handleCommandRef.current = handleCommand;
+  }, [handleCommand]);
 
   useEffect(() => {
     if (!SpeechRecognition) return;
@@ -303,11 +296,23 @@ export default function AccessibilityToolbar() {
 
     recog.onresult = (e) => {
       const cmd = e.results[e.results.length - 1][0].transcript.toLowerCase();
-      handleCommand(cmd);
+      if (handleCommandRef.current) {
+        handleCommandRef.current(cmd);
+      }
     };
 
-    setRecognition(recog);
-  }, [handleCommand]);
+    recog.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recog;
+    
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!toolbarOpen) {
@@ -375,6 +380,19 @@ export default function AccessibilityToolbar() {
     loadVoices();
   }, []);
 
+  // Chrome TTS Keep-Alive: Chrome has a bug where it stops speaking after ~15s.
+  // Periodically calling resume() keeps it going.
+  useEffect(() => {
+    let interval;
+    if (!isPaused && (synth.speaking || synth.pending)) {
+      interval = setInterval(() => {
+        synth.pause();
+        synth.resume();
+      }, 10000);
+    }
+    return () => clearInterval(interval);
+  }, [isPaused]);
+
   useEffect(() => {
     const appContent = document.getElementById("app-content");
 
@@ -389,14 +407,7 @@ export default function AccessibilityToolbar() {
 
       const text = e.target.innerText || e.target.textContent;
       if (text && text.trim().length > 0) {
-        speakText(text.trim());
-
-        // Brief visual feedback
-        const originalBg = e.target.style.backgroundColor;
-        e.target.style.backgroundColor = "rgba(59, 130, 246, 0.05)";
-        setTimeout(() => {
-          e.target.style.backgroundColor = originalBg;
-        }, 500);
+        speakText([{ text: text.trim(), el: e.target }]);
       }
     };
 

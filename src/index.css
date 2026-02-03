@@ -15,3 +15,10 @@ html {
 .click-to-speak-active {
   cursor: help !important;
 }
+
+.tts-highlight {
+  background-color: rgba(250, 204, 21, 0.25) !important;
+  border-radius: 4px;
+  padding: 2px 0;
+  display: inline;
+}
