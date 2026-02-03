@@ -6,3 +6,12 @@
 html {
   scroll-behavior: smooth;
 }
+
+.btn {
+  @apply px-3 py-1 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition;
+}
+
+/* Cursor for Click to Speak mode */
+.click-to-speak-active {
+  cursor: help !important;
+}

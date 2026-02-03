@@ -23,6 +23,12 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
+    - name: Copy index.html to public
+      run: |
+        # Copy index.html from root to public
+        cp index.html public/index.html
+        echo "✅ index.html copied to public directory"
+      
     - name: Verify public files
       run: |
         echo "📁 Public directory contents:"
