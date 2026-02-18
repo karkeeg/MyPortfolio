@@ -1,4 +1,7 @@
+/* eslint-disable jsx-a11y/alt-text */
 import { useEffect, useState, useCallback, useRef } from "react";
+import { AlignLeft, AlignCenter, AlignRight, AlignJustify } from "lucide-react";
+import { DropdownPortal } from "./DropDownPortal";
 
 const synth = window.speechSynthesis;
 const SpeechRecognition =
@@ -20,6 +23,23 @@ export default function AccessibilityToolbar() {
   const [clickToSpeak, setClickToSpeak] = useState(false);
   const utteranceRef = useRef(null);
   const speechIdRef = useRef(0);
+
+  const [alignmentPanelOpen, setAlignmentPanelOpen] = useState(false);
+  const [textAlign, setTextAlign] = useState("default");
+
+  const [lineHeight, setLineHeight] = useState("default");
+  const [lineHeightPanelOpen, setLineHeightPanelOpen] = useState(false);
+
+  const [letterSpacing, setLetterSpacing] = useState("default");
+  const [wordSpacing, setWordSpacing] = useState("default");
+  const [letterSpacingPanelOpen, setLetterSpacingPanelOpen] = useState(false);
+
+  // Refs for trigger buttons (for portal positioning)
+  const ttsBtnRef = useRef(null);
+  const fontBtnRef = useRef(null);
+  const alignBtnRef = useRef(null);
+  const lineHeightBtnRef = useRef(null);
+  const letterSpacingBtnRef = useRef(null);
 
   const removeHighlight = useCallback(() => {
     const highlights = document.querySelectorAll(".tts-highlight");
@@ -168,25 +188,23 @@ export default function AccessibilityToolbar() {
     // Gather semantic blocks including interactive elements
     const selectors = "h1, h2, h3, h4, h5, h6, p, li, button, a";
     const allElements = Array.from(appContent.querySelectorAll(selectors));
-    
+
     const elements = allElements.filter((el) => {
       // Skip the toolbar itself
       if (el.closest("[data-accessibility-toolbar]")) return false;
 
       const style = window.getComputedStyle(el);
-      const isVisible = style.display !== "none" && style.visibility !== "hidden";
+      const isVisible =
+        style.display !== "none" && style.visibility !== "hidden";
       if (!isVisible) return false;
 
       // Get text: prioritize aria-label for icon buttons
       const text = el.getAttribute("aria-label") || el.innerText.trim();
       if (text.length === 0) return false;
-
-      // Check if this element contains any other element from our selector list
-      // to avoid duplicate reading.
-      const hasChildElement = allElements.some(other => 
-        other !== el && el.contains(other)
+      const hasChildElement = allElements.some(
+        (other) => other !== el && el.contains(other),
       );
-      
+
       return !hasChildElement;
     });
 
@@ -230,48 +248,40 @@ export default function AccessibilityToolbar() {
     speechIdRef.current++;
     synth.cancel();
 
-    // Remove text highlighting
-    removeHighlight();
-
-    // Stop voice recognition
-    stopListening();
-
     // Reset all states
+    removeHighlight();
+    stopListening();
     setIsListening(false);
     setIsPaused(false);
     setSpeed(1.0);
     setVoiceGender("male");
     setClickToSpeak(false);
-
-    // Reset font settings
     setFontSize(16);
     setDyslexiaFont(false);
     setSelectedFont("");
-
-    // Close all panels
+    setTextAlign("default");
+    setLineHeight("default");
     setTtsPanelOpen(false);
     setFontPanelOpen(false);
+    setAlignmentPanelOpen(false);
+    setLineHeightPanelOpen(false);
+    setLetterSpacing("default");
+    setLetterSpacingPanelOpen(false);
+    setWordSpacing("default");
   };
 
-  const toggleTtsPanel = () => {
-    setTtsPanelOpen(!ttsPanelOpen);
+  const closeAllPanels = () => {
+    setTtsPanelOpen(false);
+    setFontPanelOpen(false);
+    setAlignmentPanelOpen(false);
+    setLineHeightPanelOpen(false);
+    setLetterSpacingPanelOpen(false);
   };
 
-  const toggleFontPanel = () => {
-    setFontPanelOpen(!fontPanelOpen);
-  };
+  const increaseFontSize = () => setFontSize((prev) => Math.min(prev + 2, 64));
+  const decreaseFontSize = () => setFontSize((prev) => Math.max(prev - 2, 12));
+  const resetFontSize = () => setFontSize(16);
 
-  const increaseFontSize = () => {
-    setFontSize((prev) => Math.min(prev + 2, 64));
-  };
-
-  const decreaseFontSize = () => {
-    setFontSize((prev) => Math.max(prev - 2, 12));
-  };
-
-  const resetFontSize = () => {
-    setFontSize(16);
-  };
   const startListening = () => {
     if (!recognitionRef.current) return;
     try {
@@ -296,27 +306,19 @@ export default function AccessibilityToolbar() {
 
     recog.onresult = (e) => {
       const cmd = e.results[e.results.length - 1][0].transcript.toLowerCase();
-      if (handleCommandRef.current) {
-        handleCommandRef.current(cmd);
-      }
+      if (handleCommandRef.current) handleCommandRef.current(cmd);
     };
-
-    recog.onend = () => {
-      setIsListening(false);
-    };
-
+    recog.onend = () => setIsListening(false);
     recognitionRef.current = recog;
-    
+
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
+      if (recognitionRef.current) recognitionRef.current.stop();
     };
   }, []);
 
   useEffect(() => {
     if (!toolbarOpen) {
-      setTtsPanelOpen(false);
+      closeAllPanels();
     }
   }, [toolbarOpen]);
 
@@ -335,48 +337,53 @@ export default function AccessibilityToolbar() {
 
     // Apply font size - exclude anything with data-accessibility-toolbar attribute or its children
     if (fontSize !== 16) {
-      css += `
-        #app-content, #app-content * {
-          font-size: ${fontSize}px !important;
-        }
-      `;
+      css += `#app-content, #app-content * { font-size: ${fontSize}px !important; }`;
     }
-
-    // Apply font family if selected
+    if (textAlign !== "default") {
+      css += `#app-content, #app-content * { text-align: ${textAlign} !important; }`;
+    }
+    if (lineHeight !== "default") {
+      css += `#app-content, #app-content * { line-height: ${lineHeight} !important; }`;
+    }
+    if (letterSpacing !== "default") {
+      css += `#app-content, #app-content * { letter-spacing: ${letterSpacing} !important; }`;
+    }
+    if (wordSpacing !== "default") {
+      css += `#app-content, #app-content * { word-spacing: ${wordSpacing} !important; }`;
+    }
     if (dyslexiaFont) {
-      css += `
-        #app-content, #app-content * {
-          font-family: "OpenDyslexic", "Comic Sans MS", sans-serif !important;
-        }
-      `;
+      css += `#app-content, #app-content * { font-family: "OpenDyslexic", "Comic Sans MS", sans-serif !important; }`;
     } else if (selectedFont) {
-      css += `
-        #app-content, #app-content * {
-          font-family: ${selectedFont} !important;
-        }
-      `;
+      css += `#app-content, #app-content * { font-family: "${selectedFont}", sans-serif !important; }`;
     }
-
     styleEl.textContent = css;
 
     // Cleanup function
     return () => {
-      if (fontSize === 16 && !dyslexiaFont && !selectedFont) {
+      if (
+        fontSize === 16 &&
+        !dyslexiaFont &&
+        !selectedFont &&
+        textAlign === "default" &&
+        lineHeight === "default" &&
+        letterSpacing === "default"
+      ) {
         styleEl.textContent = "";
       }
     };
-  }, [fontSize, dyslexiaFont, selectedFont]);
+  }, [
+    fontSize,
+    dyslexiaFont,
+    selectedFont,
+    textAlign,
+    lineHeight,
+    letterSpacing,
+    wordSpacing,
+  ]);
 
   useEffect(() => {
-    const loadVoices = () => {
-      // This forces the browser to populate the voice list
-      synth.getVoices();
-    };
-
-    // Some browsers need this event to trigger the load
-    if (synth.onvoiceschanged !== undefined) {
-      synth.onvoiceschanged = loadVoices;
-    }
+    const loadVoices = () => synth.getVoices();
+    if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
     loadVoices();
   }, []);
 
@@ -421,8 +428,19 @@ export default function AccessibilityToolbar() {
     };
   }, [clickToSpeak, speakText]);
 
+  // Close panels when clicking outside
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (e.target.closest("[data-accessibility-toolbar]")) return;
+      if (e.target.closest("[data-accessibility-dropdown]")) return;
+      closeAllPanels();
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
   return (
-    <div data-accessibility-toolbar className="accessibility-toolbar">
+    <div data-accessibility-toolbar className="accessibility-toolbar w-full">
       {/* Floating Accessibility Button */}
       {!toolbarOpen && (
         <button
@@ -448,13 +466,13 @@ export default function AccessibilityToolbar() {
 
       {/* Top Toolbar */}
       {toolbarOpen && (
-        <div className="fixed top-4 left-1/2 opacity-90 -translate-x-1/2 w-[90%] max-w-4xl z-[9999] bg-white/80 backdrop-blur-md border border-slate-200/50 shadow-lg rounded-2xl">
+        <div className="w-full bg-purple-950 border-4 border-purple-600 shadow-lg">
           <div className="mx-auto px-4 py-2 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               {/* Close Button */}
               <button
                 onClick={() => setToolbarOpen(false)}
-                className="p-2.5 hover:bg-gray-100 rounded-xl transition-colors duration-200 text-gray-600 hover:text-gray-900"
+                className="p-2.5 bg-gray-100 rounded-xl transition-colors duration-200 text-gray-600 hover:text-gray-950"
                 aria-label="Close Toolbar"
               >
                 <svg
@@ -474,40 +492,31 @@ export default function AccessibilityToolbar() {
 
               <div className="h-8 w-px bg-gray-200"></div>
 
-              {/* Text To Speech Button with Dropdown */}
+              {/* TTS Button */}
               <div className="relative">
                 <button
-                  onClick={toggleTtsPanel}
-                  className={`p-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 shadow-sm ${
-                    ttsPanelOpen ? "ring-2 ring-blue-500/20" : ""
-                  }`}
+                  ref={ttsBtnRef}
+                  onClick={() => {
+                    closeAllPanels();
+                    setTtsPanelOpen((v) => !v);
+                  }}
+                  className={`p-2.5 bg-gray-100 text-white rounded-lg transition-all duration-200 shadow-sm ${ttsPanelOpen ? "ring-2 ring-purple-500/20" : ""}`}
                   aria-label="Text To Speech"
                   title="Text To Speech"
                 >
-                  <svg
-                    className="w-7 h-7"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-                    />
-                  </svg>
+                  <img src="/voice.svg" className="h-8" />
                 </button>
 
-                {/* Text-To-Speech Dropdown Panel */}
-                {ttsPanelOpen && (
-                  <div className="absolute top-full mt-4 left-0 w-80 bg-white/95 backdrop-blur-lg rounded-xl shadow-2xl border border-slate-100/50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
-                    {/* Header */}
-                    <div className="flex justify-between items-center p-4 bg-slate-50/50 border-b border-slate-100/50">
+                <DropdownPortal triggerRef={ttsBtnRef} isOpen={ttsPanelOpen}>
+                  <div
+                    data-accessibility-dropdown
+                    className="w-80 bg-purple-950 rounded-xl shadow-2xl border border-slate-100 overflow-hidden"
+                  >
+                    <div className="flex justify-between items-start p-4 bg-purple-950">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
+                        <div className="w-9 h-9 rounded-lg bg-yellow-400 flex items-center justify-center">
                           <svg
-                            className="w-5 h-5 text-blue-600"
+                            className="w-5 h-5 text-purple-600"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -521,17 +530,17 @@ export default function AccessibilityToolbar() {
                           </svg>
                         </div>
                         <div>
-                          <h3 className="font-medium text-slate-900 leading-tight">
+                          <h3 className="font-bold text-3xl text-white leading-tight">
                             Text to Speech
                           </h3>
-                          <p className="text-[11px] text-slate-500">
-                            Customize reading
+                          <p className="text-[11px] text-white">
+                            Customise reading
                           </p>
                         </div>
                       </div>
                       <button
                         onClick={() => setTtsPanelOpen(false)}
-                        className="p-1.5 hover:bg-slate-200/50 rounded-md transition-colors text-slate-400"
+                        className="p-1.5 hover:bg-slate-200 rounded-md transition-colors text-slate-400"
                       >
                         <svg
                           className="w-5 h-5"
@@ -548,89 +557,62 @@ export default function AccessibilityToolbar() {
                         </svg>
                       </button>
                     </div>
-
-                    {/* Body */}
+                    <hr className="border-purple-500 border-2 mb-4 -mx-4" />
                     <div className="p-4 flex flex-col gap-4">
                       {/* Voice Selection */}
                       <div className="flex flex-col gap-3">
-                        <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        <label className="text-xs font-medium text-white uppercase tracking-wider">
                           Voice Type
                         </label>
                         <div className="grid grid-cols-2 gap-2">
-                          <button
-                            onClick={() => setVoiceGender("male")}
-                            className={`py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
-                              voiceGender === "male"
-                                ? "bg-blue-600 text-white shadow-sm"
-                                : "bg-slate-50 text-slate-600 hover:bg-slate-100"
-                            }`}
-                          >
-                            <svg
-                              className="w-5 h-5"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
+                          {["male", "female"].map((gender) => (
+                            <button
+                              key={gender}
+                              onClick={() => setVoiceGender(gender)}
+                              className={`py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${voiceGender === gender ? "bg-purple-600 text-white shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100"}`}
                             >
-                              <path
-                                fillRule="evenodd"
-                                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                            Male
-                          </button>
-                          <button
-                            onClick={() => setVoiceGender("female")}
-                            className={`py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
-                              voiceGender === "female"
-                                ? "bg-blue-600 text-white shadow-sm"
-                                : "bg-slate-50 text-slate-600 hover:bg-slate-100"
-                            }`}
-                          >
-                            <svg
-                              className="w-5 h-5"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                            Female
-                          </button>
+                              <svg
+                                className="w-5 h-5"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                              {gender.charAt(0).toUpperCase() + gender.slice(1)}
+                            </button>
+                          ))}
                         </div>
                       </div>
 
                       {/* Reading Speed */}
                       <div className="flex flex-col gap-3">
                         <div className="flex justify-between items-center">
-                          <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          <label className="text-xs font-medium text-white uppercase tracking-wider">
                             Reading Speed
                           </label>
-                          <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                          <span className="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded">
                             {speed.toFixed(1)}x
                           </span>
                         </div>
-                        <div className="relative">
-                          <input
-                            type="range"
-                            min="0.5"
-                            max="2.0"
-                            step="0.1"
-                            value={speed}
-                            onChange={(e) =>
-                              setSpeed(parseFloat(e.target.value))
-                            }
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                            style={{
-                              background: `linear-gradient(to right, #2563eb 0%, #2563eb ${((speed - 0.5) / 1.5) * 100}%, #e5e7eb ${((speed - 0.5) / 1.5) * 100}%, #e5e7eb 100%)`,
-                            }}
-                          />
-                          <div className="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>Slow</span>
-                            <span>Fast</span>
-                          </div>
+                        <input
+                          type="range"
+                          min="0.5"
+                          max="2.0"
+                          step="0.1"
+                          value={speed}
+                          onChange={(e) => setSpeed(parseFloat(e.target.value))}
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                          style={{
+                            background: `linear-gradient(to right, #9333ea 0%, #7e22ce ${((speed - 0.5) / 1.5) * 100}%, #e5e7eb ${((speed - 0.5) / 1.5) * 100}%, #e5e7eb 100%)`,
+                          }}
+                        />
+                        <div className="flex justify-between text-xs text-white">
+                          <span>Slow</span>
+                          <span>Fast</span>
                         </div>
                       </div>
 
@@ -638,7 +620,7 @@ export default function AccessibilityToolbar() {
                       <div className="grid grid-cols-2 gap-2">
                         <button
                           onClick={readPage}
-                          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm flex items-center justify-center gap-2"
+                          className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm flex items-center justify-center gap-2"
                         >
                           <svg
                             className="w-5 h-5"
@@ -695,11 +677,7 @@ export default function AccessibilityToolbar() {
 
                       <button
                         onClick={startListening}
-                        className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 border ${
-                          isListening
-                            ? "bg-emerald-50 border-emerald-100 text-emerald-700"
-                            : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                        }`}
+                        className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 border ${isListening ? "bg-emerald-50 border-emerald-100 text-emerald-700" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
                       >
                         <svg
                           className={`w-5 h-5 ${isListening ? "animate-pulse" : ""}`}
@@ -719,11 +697,7 @@ export default function AccessibilityToolbar() {
 
                       <button
                         onClick={() => setClickToSpeak(!clickToSpeak)}
-                        className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 border ${
-                          clickToSpeak
-                            ? "bg-blue-50 border-blue-100 text-blue-700"
-                            : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                        }`}
+                        className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 border ${clickToSpeak ? "bg-purple-50 border-purple-100 text-purple-700" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
                       >
                         <svg
                           className="w-5 h-5"
@@ -744,69 +718,52 @@ export default function AccessibilityToolbar() {
                       </button>
                     </div>
                   </div>
-                )}
+                </DropdownPortal>
               </div>
 
               <div className="h-8 w-px bg-gray-200"></div>
 
-              {/* Font Tools Button with Dropdown */}
+              {/* Font Tools Button */}
               <div className="relative">
                 <button
-                  onClick={toggleFontPanel}
-                  className={`p-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-all duration-200 shadow-sm ${
-                    fontPanelOpen ? "ring-2 ring-amber-500/20" : ""
-                  }`}
+                  ref={fontBtnRef}
+                  onClick={() => {
+                    closeAllPanels();
+                    setFontPanelOpen((v) => !v);
+                  }}
+                  className={`p-2.5 bg-gray-100 text-white rounded-lg transition-all duration-200 shadow-sm ${fontPanelOpen ? "ring-2 ring-amber-500/20" : ""}`}
                   aria-label="Font Tools"
                   title="Font Tools"
                 >
-                  <svg
-                    className="w-7 h-7"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                    />
-                  </svg>
+                  <img src="/Aa.svg" className="h-8" alt="Font Tools" />
                 </button>
 
-                {/* Font Tools Dropdown Panel */}
-                {fontPanelOpen && (
-                  <div className="absolute top-full mt-4 left-0 w-80 bg-white/95 backdrop-blur-lg rounded-xl shadow-2xl border border-slate-100/50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
-                    {/* Header */}
-                    <div className="flex justify-between items-center p-4 bg-slate-50/50 border-b border-slate-100/50">
+                <DropdownPortal triggerRef={fontBtnRef} isOpen={fontPanelOpen}>
+                  <div
+                    data-accessibility-dropdown
+                    className="w-80 bg-purple-950 rounded-xl shadow-2xl border border-slate-100 overflow-hidden"
+                  >
+                    <div className="flex justify-between items-start p-4 bg-purple-950">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
-                          <svg
-                            className="w-5 h-5 text-amber-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                          </svg>
+                        <div className="size-15 rounded-lg p-4 bg-yellow-400 flex items-center justify-center">
+                          <img
+                            src="/Aa.svg"
+                            className="h-10"
+                            alt="Font Tools"
+                          />
                         </div>
                         <div>
-                          <h3 className="font-medium text-slate-900 leading-tight">
+                          <h3 className="font-bold text-3xl text-white leading-tight">
                             Font Tools
                           </h3>
-                          <p className="text-[11px] text-slate-500">
-                            Customize aesthetics
+                          <p className="text-[11px] text-white">
+                            Customise aesthetics
                           </p>
                         </div>
                       </div>
                       <button
                         onClick={() => setFontPanelOpen(false)}
-                        className="p-1.5 hover:bg-slate-200/50 rounded-md transition-colors text-slate-400"
+                        className="p-1.5 hover:bg-slate-200 rounded-md transition-colors text-slate-400"
                       >
                         <svg
                           className="w-5 h-5"
@@ -824,107 +781,481 @@ export default function AccessibilityToolbar() {
                       </button>
                     </div>
 
+                    <hr className="border-purple-500 border-2 mb-4 -mx-4" />
+
                     {/* Body */}
                     <div className="p-4 flex flex-col gap-4">
                       {/* Font Size */}
                       <div className="flex flex-col gap-3">
-                        <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        <label className="text-lg font-medium text-white uppercase tracking-wider">
                           Font Size
                         </label>
                         <div className="flex items-center gap-3">
                           <button
                             onClick={decreaseFontSize}
-                            className="w-10 h-10 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg transition-all duration-200 flex items-center justify-center font-bold text-lg border border-slate-100"
+                            className="w-10 h-10 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-all duration-200 flex items-center justify-center font-bold text-lg"
                           >
                             −
                           </button>
                           <div className="flex-1 text-center">
-                            <div className="text-xl font-bold text-amber-600">
+                            <div className="text-xl font-bold text-white">
                               {fontSize}px
                             </div>
                           </div>
                           <button
                             onClick={increaseFontSize}
-                            className="w-10 h-10 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg transition-all duration-200 flex items-center justify-center font-bold text-lg border border-slate-100"
+                            className="w-10 h-10 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-all duration-200 flex items-center justify-center font-bold text-lg"
                           >
                             +
                           </button>
                           <button
                             onClick={resetFontSize}
-                            className="px-3 h-10 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm transition-all duration-200 font-medium"
+                            className="px-3 h-10  bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm transition-all duration-200 font-medium"
                           >
                             Reset
                           </button>
                         </div>
                       </div>
 
-                      {/* Dyslexia Friendly Fonts */}
+                      {/* Dyslexia Font */}
                       <div className="flex flex-col gap-3">
-                        <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-                          Accessibility Font
-                        </label>
-                        <button
-                          onClick={() => setDyslexiaFont(!dyslexiaFont)}
-                          className={`w-full p-3 rounded-lg text-sm font-medium transition-all duration-200 text-left flex items-center justify-between border ${
-                            dyslexiaFont
-                              ? "bg-amber-50 border-amber-200 text-amber-700"
-                              : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                          }`}
-                        >
-                          <span>Dyslexia Friendly</span>
-                          <svg
-                            className={`w-5 h-5 transition-transform ${
-                              dyslexiaFont ? "rotate-180" : ""
-                            }`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-
-                      {/* More Fonts */}
-                      <div className="flex flex-col gap-3">
-                        <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-                          Font Family
+                        <label className="text-xs font-medium text-white uppercase tracking-wider">
+                          Dyslexia Friendly fonts
                         </label>
                         <select
                           value={selectedFont}
                           onChange={(e) => setSelectedFont(e.target.value)}
-                          className="w-full p-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-sm transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                          className="w-full p-2.5 bg-purple-700 text-white rounded-lg text-sm transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                         >
-                          <option value="">Default Font</option>
-                          <option value="Arial, sans-serif">Arial</option>
-                          <option value="Verdana, sans-serif">Verdana</option>
-                          <option value="Georgia, serif">Georgia</option>
-                          <option value="'Times New Roman', serif">
+                          <option value="">Default</option>
+                          <option value="Andika">Andika</option>
+                          <option value="Arial">Arial</option>
+                          <option value="Calibri">Calibri</option>
+                          <option value="Century Gothic">Century Gothic</option>
+                          <option value="Comic Sans MS">Comic Sans MS</option>
+                          <option value="Lexend">Lexend</option>
+                          <option value="Open Sans">Open Sans</option>
+                          <option value="OpenDyslexic">Open Dyslexic</option>
+                          <option value="Tahoma">Tahoma</option>
+                          <option value="Trebuchet MS">Trebuchet MS</option>
+                          <option value="Verdana">Verdana</option>
+                        </select>
+                      </div>
+
+                      {/* Font Family */}
+                      <div className="flex flex-col gap-3">
+                        <label className="text-xs font-medium text-white uppercase tracking-wider">
+                          More Fonts
+                        </label>
+                        <select
+                          value={selectedFont}
+                          onChange={(e) => setSelectedFont(e.target.value)}
+                          className="w-full p-2.5 bg-purple-700 text-white rounded-lg text-sm transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                        >
+                          <option value="">Select</option>
+                          <option value="Arial">Arial</option>
+                          <option value="Georgia">Georgia</option>
+                          <option value="Monospace">Monospace</option>
+                          <option value="Tahoma">Tahoma</option>
+                          <option value="Times New Roman">
                             Times New Roman
                           </option>
-                          <option value="'Courier New', monospace">
-                            Courier New
-                          </option>
-                          <option value="Tahoma, sans-serif">Tahoma</option>
-                          <option value="'Trebuchet MS', sans-serif">
-                            Trebuchet MS
-                          </option>
+                          <option value="Trebuchet MS">Trebuchet MS</option>
+                          <option value="Verdana">Verdana</option>
                         </select>
                       </div>
                     </div>
                   </div>
-                )}
+                </DropdownPortal>
+              </div>
+
+              <div className="h-8 w-px bg-gray-200"></div>
+
+              {/* Text Align Button */}
+              <div className="relative">
+                <button
+                  ref={alignBtnRef}
+                  onClick={() => {
+                    closeAllPanels();
+                    setAlignmentPanelOpen((v) => !v);
+                  }}
+                  className={`p-2 bg-gray-100 text-white rounded ${alignmentPanelOpen ? "ring-2 ring-indigo-300" : ""}`}
+                  aria-label="Text Align"
+                  title="Text Align"
+                >
+                  <img src="/text-align.svg" className="h-8" alt="Text Align" />
+                </button>
+
+                <DropdownPortal
+                  triggerRef={alignBtnRef}
+                  isOpen={alignmentPanelOpen}
+                >
+                  <div
+                    data-accessibility-dropdown
+                    className="w-full bg-purple-950 rounded-xl shadow-xl border p-4"
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className="size-15 rounded-lg p-4 bg-yellow-400 flex items-center justify-center">
+                          <img
+                            src="/text-align.svg"
+                            className="h-10"
+                            alt="Font Tools"
+                          />
+                        </div>
+                        <h3 className="font-bold text-3xl text-white">
+                          Text Alignment
+                        </h3>
+                      </div>
+
+                      <button
+                        onClick={() => setAlignmentPanelOpen(false)}
+                        className="p-1.5 hover:bg-slate-200 rounded-md transition-colors text-slate-400"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    <hr className="border-purple-500 border-2 mb-4 -mx-4" />
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { icon: AlignLeft, name: "Left", value: "left" },
+                        { icon: AlignCenter, name: "Center", value: "center" },
+                        { icon: AlignRight, name: "Right", value: "right" },
+                        {
+                          icon: AlignJustify,
+                          name: "Justify",
+                          value: "justify",
+                        },
+                      ].map((option) => {
+                        const Icon = option.icon;
+                        return (
+                          <button
+                            key={option.value}
+                            onClick={() => setTextAlign(option.value)}
+                            className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-all duration-200 ${textAlign === option.value ? "bg-purple-800 text-white" : "bg-purple-700 text-white"}`}
+                          >
+                            <span className="bg-white p-4 m-4">
+                              <Icon className="text-black" size={25} />
+                            </span>
+
+                            <span className="text-white">{option.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button
+                      onClick={() => setTextAlign("default")}
+                      className="mt-3 w-full bg-gray-100 py-2 rounded text-sm"
+                    >
+                      Reset Alignment
+                    </button>
+                  </div>
+                </DropdownPortal>
+              </div>
+
+              <div className="h-8 w-px bg-gray-200"></div>
+
+              {/* Line Height Button */}
+              <div className="relative">
+                <button
+                  ref={lineHeightBtnRef}
+                  onClick={() => {
+                    closeAllPanels();
+                    setLineHeightPanelOpen((v) => !v);
+                  }}
+                  className={`p-2 bg-gray-100 text-white rounded ${lineHeightPanelOpen ? "ring-2 ring-indigo-300" : ""}`}
+                  aria-label="Line Height"
+                  title="Line Height"
+                >
+                  <img
+                    src="/line-height.svg"
+                    className="h-8"
+                    alt="Line Height"
+                  />
+                </button>
+
+                <DropdownPortal
+                  triggerRef={lineHeightBtnRef}
+                  isOpen={lineHeightPanelOpen}
+                >
+                  <div
+                    data-accessibility-dropdown
+                    className="w-full bg-purple-950 rounded-xl shadow-xl border p-4"
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className="size-15 rounded-lg p-4 bg-yellow-400 flex items-center justify-center">
+                          <img
+                            src="/line-height.svg"
+                            className="h-10"
+                            alt="Line Height"
+                          />
+                        </div>
+                        <h3 className="font-bold text-3xl text-white">
+                          Line Height
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() => setLineHeightPanelOpen(false)}
+                        className="p-1.5 hover:bg-slate-200 rounded-md transition-colors text-slate-400"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    <hr className="border-purple-500 border-2 mb-4 -mx-4" />
+                    <div className="flex flex-col gap-3 text-white overflow-hidden">
+                      <span className="text-base break-words hyphens-auto">
+                        Click or tap the minus (-) or plus (+)
+                        <br /> button signs below to increase the line
+                        <br /> height of the website page.
+                      </span>
+                      <span className="text-base break-words hyphens-auto">
+                        Click the reset button to clear your
+                        <br /> selection or to start over again.
+                      </span>
+                      <div className="flex mx-auto gap-3 items-center mt-4">
+                        <button
+                          onClick={() =>
+                            setLineHeight((prev) => {
+                              const current =
+                                prev === "default" ? 1 : parseFloat(prev);
+                              return current > 1
+                                ? String((current - 0.1).toFixed(1))
+                                : "1";
+                            })
+                          }
+                          className="w-10 h-10 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-all duration-200 flex items-center justify-center font-bold text-lg"
+                        >
+                          −
+                        </button>
+                        <div className="flex-1 text-center">
+                          <div className="text-xl font-bold text-white">
+                            {lineHeight === "default"
+                              ? "1.0"
+                              : parseFloat(lineHeight).toFixed(1)}
+                            x
+                          </div>
+                        </div>
+                        <button
+                          onClick={() =>
+                            setLineHeight((prev) => {
+                              const current =
+                                prev === "default" ? 1 : parseFloat(prev);
+                              return current < 2.5
+                                ? String((current + 0.1).toFixed(1))
+                                : "2.5";
+                            })
+                          }
+                          className="w-10 h-10 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-all duration-200 flex items-center justify-center font-bold text-lg"
+                        >
+                          +
+                        </button>
+                        <button
+                          onClick={() => setLineHeight("default")}
+                          className="px-3 h-10 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm transition-all duration-200 font-medium"
+                        >
+                          Reset
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </DropdownPortal>
+              </div>
+
+              <div className="h-8 w-px bg-gray-200"></div>
+
+              {/* Letter Spacing Button */}
+              <div className="relative">
+                <button
+                  ref={letterSpacingBtnRef}
+                  onClick={() => {
+                    closeAllPanels();
+                    setLetterSpacingPanelOpen((v) => !v);
+                  }}
+                  className={`p-2 bg-gray-100 text-white rounded ${letterSpacingPanelOpen ? "ring-2 ring-indigo-300" : ""}`}
+                  title="Letter Spacing"
+                >
+                  <img
+                    src="/letter-spacing.svg"
+                    className="h-8"
+                    alt="Letter Spacing"
+                  />
+                </button>
+
+                <DropdownPortal
+                  triggerRef={letterSpacingBtnRef}
+                  isOpen={letterSpacingPanelOpen}
+                >
+                  <div
+                    data-accessibility-dropdown
+                    className="w-full bg-purple-950 rounded-xl shadow-xl border p-4"
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className="size-15 rounded-lg p-4 bg-yellow-400 flex items-center justify-center">
+                          <img
+                            src="/letter-spacing.svg"
+                            className="h-10"
+                            alt="Font Tools"
+                          />
+                        </div>
+                        <h3 className="font-bold text-3xl text-white">
+                          Letter Spacing
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() => setLetterSpacingPanelOpen(false)}
+                        className="p-1.5 hover:bg-slate-200 rounded-md transition-colors text-slate-400"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    <hr className="border-purple-500 border-2 my-8 -mx-4" />
+                    <div className="flex flex-col mb-4 gap-3">
+                      <label className="text-lg font-medium text-white uppercase tracking-wider">
+                        Letter Spacing
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() =>
+                            setLetterSpacing((prev) => {
+                              const current =
+                                prev === "default" ? 0 : parseFloat(prev);
+                              return current > 0
+                                ? String((current - 0.5).toFixed(1)) + "px"
+                                : "0px";
+                            })
+                          }
+                          className="w-10 h-10 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-all duration-200 flex items-center justify-center font-bold text-lg"
+                        >
+                          −
+                        </button>
+                        <div className="flex-1 text-center">
+                          <div className="text-xl font-bold text-white">
+                            {letterSpacing === "default"
+                              ? "0.0"
+                              : parseFloat(letterSpacing).toFixed(1)}
+                            px
+                          </div>
+                        </div>
+                        <button
+                          onClick={() =>
+                            setLetterSpacing((prev) => {
+                              const current =
+                                prev === "default" ? 0 : parseFloat(prev);
+                              return current < 10
+                                ? String((current + 0.5).toFixed(1)) + "px"
+                                : "10px";
+                            })
+                          }
+                          className="w-10 h-10 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-all duration-200 flex items-center justify-center font-bold text-lg"
+                        >
+                          +
+                        </button>
+                        <button
+                          onClick={() => setLetterSpacing("default")}
+                          className="px-3 h-10 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm transition-all duration-200 font-medium"
+                        >
+                          Reset
+                        </button>
+                      </div>
+                    </div>
+
+                    <hr className="border-purple-500 border-2 my-8 -mx-4" />
+
+                    {/* Word Spacing */}
+                    <div className="flex flex-col gap-3">
+                      <label className="text-lg font-medium text-white uppercase tracking-wider">
+                        Word Spacing
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() =>
+                            setWordSpacing((prev) => {
+                              const current =
+                                prev === "default" ? 0 : parseFloat(prev);
+                              return current > 0
+                                ? String((current - 0.5).toFixed(1)) + "px"
+                                : "0px";
+                            })
+                          }
+                          className="w-10 h-10 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-all duration-200 flex items-center justify-center font-bold text-lg"
+                        >
+                          −
+                        </button>
+                        <div className="flex-1 text-center">
+                          <div className="text-xl font-bold text-white">
+                            {wordSpacing === "default"
+                              ? "0.0"
+                              : parseFloat(wordSpacing).toFixed(1)}
+                            px
+                          </div>
+                        </div>
+                        <button
+                          onClick={() =>
+                            setWordSpacing((prev) => {
+                              const current =
+                                prev === "default" ? 0 : parseFloat(prev);
+                              return current < 20
+                                ? String((current + 0.5).toFixed(1)) + "px"
+                                : "20px";
+                            })
+                          }
+                          className="w-10 h-10 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-all duration-200 flex items-center justify-center font-bold text-lg"
+                        >
+                          +
+                        </button>
+                        <button
+                          onClick={() => setWordSpacing("default")}
+                          className="px-3 h-10 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm transition-all duration-200 font-medium"
+                        >
+                          Reset
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </DropdownPortal>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <div className="h-8 w-px bg-slate-100"></div>
-
               {/* Reset Button */}
               <button
                 onClick={resetAll}

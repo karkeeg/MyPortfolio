@@ -8,14 +8,12 @@ import Footer from "./components/Footer";
 import ThemeToggle from "./components/ThemeToggle";
 import { useState } from "react";
 import { Toaster } from "react-hot-toast"; // ✨ add this
-import TtsToolbar from "./components/TtsToolbar";
 
 function App() {
   const [darkMode, setDarkMode] = useState(true);
 
   return (
     <>
-      <TtsToolbar />
       <div id="app-content" className={darkMode ? "dark" : ""}>
         <Toaster position="top-center" reverseOrder={false} />
         <Navbar />
