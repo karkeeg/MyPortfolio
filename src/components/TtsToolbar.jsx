@@ -490,11 +490,11 @@ export default function AccessibilityToolbar() {
                 </svg>
               </button>
 
-              <div className="h-8 w-px bg-gray-200"></div>
+              {/* <div className="h-8 w-px bg-gray-200"></div> */}
 
               {/* TTS Button */}
               <div className="relative">
-                <button
+                {/* <button
                   ref={ttsBtnRef}
                   onClick={() => {
                     closeAllPanels();
@@ -505,7 +505,7 @@ export default function AccessibilityToolbar() {
                   title="Text To Speech"
                 >
                   <img src="/voice.svg" className="h-8" />
-                </button>
+                </button> */}
 
                 <DropdownPortal triggerRef={ttsBtnRef} isOpen={ttsPanelOpen}>
                   <div
