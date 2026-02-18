@@ -490,11 +490,11 @@ export default function AccessibilityToolbar() {
                 </svg>
               </button>
 
-              <div className="h-8 w-px bg-gray-200"></div>
+              {/* <div className="h-8 w-px bg-gray-200"></div> */}
 
               {/* TTS Button */}
               <div className="relative">
-                <button
+                {/* <button
                   ref={ttsBtnRef}
                   onClick={() => {
                     closeAllPanels();
@@ -505,7 +505,7 @@ export default function AccessibilityToolbar() {
                   title="Text To Speech"
                 >
                   <img src="/voice.svg" className="h-8" />
-                </button>
+                </button> */}
 
                 <DropdownPortal triggerRef={ttsBtnRef} isOpen={ttsPanelOpen}>
                   <div
@@ -538,7 +538,7 @@ export default function AccessibilityToolbar() {
                           </p>
                         </div>
                       </div>
-                      <button
+                      {/* <button
                         onClick={() => setTtsPanelOpen(false)}
                         className="p-1.5 hover:bg-slate-200 rounded-md transition-colors text-slate-400"
                       >
@@ -555,12 +555,12 @@ export default function AccessibilityToolbar() {
                             d="M6 18L18 6M6 6l12 12"
                           />
                         </svg>
-                      </button>
+                      </button> */}
                     </div>
-                    <hr className="border-purple-500 border-2 mb-4 -mx-4" />
+                    {/* <hr className="border-purple-500 border-2 mb-4 -mx-4" /> */}
                     <div className="p-4 flex flex-col gap-4">
                       {/* Voice Selection */}
-                      <div className="flex flex-col gap-3">
+                      {/* <div className="flex flex-col gap-3">
                         <label className="text-xs font-medium text-white uppercase tracking-wider">
                           Voice Type
                         </label>
@@ -586,10 +586,10 @@ export default function AccessibilityToolbar() {
                             </button>
                           ))}
                         </div>
-                      </div>
+                      </div> */}
 
                       {/* Reading Speed */}
-                      <div className="flex flex-col gap-3">
+                      {/* <div className="flex flex-col gap-3">
                         <div className="flex justify-between items-center">
                           <label className="text-xs font-medium text-white uppercase tracking-wider">
                             Reading Speed
@@ -614,10 +614,10 @@ export default function AccessibilityToolbar() {
                           <span>Slow</span>
                           <span>Fast</span>
                         </div>
-                      </div>
+                      </div> */}
 
                       {/* Controls */}
-                      <div className="grid grid-cols-2 gap-2">
+                      {/* <div className="grid grid-cols-2 gap-2">
                         <button
                           onClick={readPage}
                           className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm flex items-center justify-center gap-2"
@@ -673,9 +673,9 @@ export default function AccessibilityToolbar() {
                             </>
                           )}
                         </button>
-                      </div>
+                      </div> */}
 
-                      <button
+                      {/* <button
                         onClick={startListening}
                         className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 border ${isListening ? "bg-emerald-50 border-emerald-100 text-emerald-700" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
                       >
@@ -693,9 +693,9 @@ export default function AccessibilityToolbar() {
                           />
                         </svg>
                         {isListening ? "Listening..." : "Voice Commands"}
-                      </button>
+                      </button> */}
 
-                      <button
+                      {/* <button
                         onClick={() => setClickToSpeak(!clickToSpeak)}
                         className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 border ${clickToSpeak ? "bg-purple-50 border-purple-100 text-purple-700" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
                       >
@@ -715,7 +715,7 @@ export default function AccessibilityToolbar() {
                         {clickToSpeak
                           ? "Double Click to Speak: ON"
                           : "Double Click to Speak: OFF"}
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                 </DropdownPortal>
