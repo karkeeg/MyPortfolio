@@ -2,28 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  body {
+    @apply bg-portfolio-main text-portfolio-text-primary font-sans antialiased selection:bg-portfolio-accent selection:text-white;
+  }
+}
+
 /* Smooth scrolling for entire website */
 html {
   scroll-behavior: smooth;
-}
-
-.btn {
-  @apply px-3 py-1 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition;
-}
-
-/* Cursor for Click to Speak mode */
-.click-to-speak-active {
-  cursor: help !important;
-}
-
-.tts-highlight {
-  background-color: rgba(250, 204, 21, 0.25) !important;
-  border-radius: 4px;
-  padding: 2px 0;
-  display: inline;
-}
-
-@font-face {
-  font-family: "Andika";
-  src: url("/public/fonts/Andika-Regular.ttf") format("truetype");
+  background-color: #101311;
 }
