@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import GeometricBackground from "./GeometricBackground";
 
 const skillsData = {
   Frontend: ["React", "Next.js", "JavaScript", "TypeScript", "Tailwind CSS", "Redux Toolkit"],
@@ -9,8 +10,9 @@ const skillsData = {
 
 const Skills = () => {
   return (
-    <section id="skills" className="py-32 px-6 md:px-12 bg-portfolio-main">
-      <div className="max-w-7xl mx-auto">
+    <section id="skills" className="relative py-32 px-6 md:px-12 bg-portfolio-main overflow-hidden">
+      <GeometricBackground />
+      <div className="relative max-w-7xl mx-auto z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}

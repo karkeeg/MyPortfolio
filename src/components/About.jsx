@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import bibek from "../assets/bibek.jpg";
+import bibek from "../assets/me.png";
 
 const About = () => {
   return (
@@ -12,7 +12,7 @@ const About = () => {
           transition={{ duration: 0.8 }}
           className="w-full md:w-1/2"
         >
-          <div className="relative group">
+          <div className="relative group max-w-md mx-auto">
             <div className="absolute inset-0 bg-portfolio-accent/20 translate-x-4 translate-y-4 rounded-sm transition-transform group-hover:translate-x-6 group-hover:translate-y-6"></div>
             <img
               src={bibek}

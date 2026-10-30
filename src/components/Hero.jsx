@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-scroll";
+import NetworkBackground from "./NetworkBackground";
 
 const Hero = () => {
   return (
@@ -7,6 +8,7 @@ const Hero = () => {
       id="home"
       className="min-h-screen flex flex-col justify-center relative px-6 md:px-12 bg-portfolio-main overflow-hidden pt-20"
     >
+      <NetworkBackground />
       {/* Background Subtle Gradient */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-portfolio-accent/5 blur-[120px] pointer-events-none" />
 
