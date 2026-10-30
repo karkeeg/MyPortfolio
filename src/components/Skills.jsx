@@ -2,10 +2,45 @@ import { motion } from "framer-motion";
 import GeometricBackground from "./GeometricBackground";
 
 const skillsData = {
-  Frontend: ["React", "Next.js", "JavaScript", "TypeScript", "Tailwind CSS", "Redux Toolkit"],
-  Backend: ["Node.js", "Express.js", "REST APIs", "JWT", "Authentication", "Zod"],
-  Databases: ["PostgreSQL", "MongoDB", "Supabase", "Redis"],
-  Workflow: ["Git & GitHub", "Docker", "API Integration", "Deployment"]
+  Frontend: [
+    "React",
+    "Next.js",
+    "React Native",
+    "JavaScript",
+    "TypeScript",
+    "Tailwind CSS",
+    "Redux Toolkit",
+    "Zustand",
+    "Chakra UI"
+  ],
+  Backend: [
+    "Node.js",
+    "Express.js",
+    "FastAPI",
+    "REST APIs",
+    "Authentication & Authorization",
+    "JWT",
+    "Role-Based Access Control",
+    "Prisma",
+    "Zod"
+  ],
+  "Databases & Services": [
+    "PostgreSQL",
+    "MongoDB",
+    "MySQL",
+    "Neo4j",
+    "Supabase",
+    "Firebase",
+    "Redis"
+  ],
+  "Tools & Workflow": [
+    "Git & GitHub",
+    "Docker",
+    "API integration & testing",
+    "Deployment workflows",
+    "Responsive development",
+    "Application debugging"
+  ]
 };
 
 const Skills = () => {
