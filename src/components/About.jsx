@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import bibek from "../assets/me.png";
+import bibek from "../assets/me.jpeg";
 
 const About = () => {
   return (
