@@ -1,0 +1,17 @@
+ INFO  Accepting connections at http://localhost:3000
+ HTTP  10/30/2026 8:02:15 AM ::1 GET /
+ HTTP  10/30/2026 8:02:15 AM ::1 Returned 200 in 250 ms
+ HTTP  10/30/2026 8:02:15 AM ::1 GET /static/js/main.ae62edc3.js
+ HTTP  10/30/2026 8:02:15 AM ::1 GET /static/css/main.dc8ddb61.css
+ HTTP  10/30/2026 8:02:15 AM ::1 Returned 200 in 11 ms
+ HTTP  10/30/2026 8:02:15 AM ::1 Returned 200 in 15 ms
+ HTTP  10/30/2026 8:02:16 AM ::1 GET /static/media/bibek.225ea0ef3075672e6eec.jpg
+ HTTP  10/30/2026 8:02:16 AM ::1 GET /static/media/airline.d6ae925a76f71490241b.png
+ HTTP  10/30/2026 8:02:16 AM ::1 GET /static/media/ecommerce.546a6ab5c40345a3ed9d.png
+ HTTP  10/30/2026 8:02:16 AM ::1 GET /static/media/countries.1447e85c10ea14e7bea7.png
+ HTTP  10/30/2026 8:02:16 AM ::1 GET /static/media/myTodo.a7f048796e332617dd8a.png
+ HTTP  10/30/2026 8:02:16 AM ::1 Returned 200 in 14 ms
+ HTTP  10/30/2026 8:02:16 AM ::1 Returned 200 in 20 ms
+ HTTP  10/30/2026 8:02:16 AM ::1 Returned 200 in 20 ms
+ HTTP  10/30/2026 8:02:16 AM ::1 Returned 200 in 28 ms
+ HTTP  10/30/2026 8:02:16 AM ::1 Returned 200 in 49 ms

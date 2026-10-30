@@ -3,60 +3,49 @@ import bibek from "../assets/bibek.jpg";
 
 const About = () => {
   return (
-    <section
-      id="about"
-      className="py-12 flex flex-col justify-center items-center text-center px-6 bg-white dark:bg-gray-900"
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-        className="max-w-4xl flex flex-col items-center"
-      >
-        {/* Profile Picture */}
+    <section id="about" className="py-32 px-6 md:px-12 bg-portfolio-main">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-16 items-center">
         <motion.div
-          initial={{ scale: 0 }}
-          whileInView={{ scale: 1 }}
-          viewport={{ once: true }}
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
-          className="relative mb-6 group"
+          className="w-full md:w-1/2"
         >
-          {/* Glowing ring effect */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 blur-lg opacity-50 group-hover:opacity-80 transition duration-500"></div>
-
-          {/* Your picture */}
-          <img
-            src={bibek} // <-- YOUR IMAGE PATH
-            alt="Bibek Karki"
-            className="w-32 h-32 rounded-full object-cover relative z-10 border-4 border-white dark:border-gray-800 shadow-lg"
-          />
+          <div className="relative group">
+            <div className="absolute inset-0 bg-portfolio-accent/20 translate-x-4 translate-y-4 rounded-sm transition-transform group-hover:translate-x-6 group-hover:translate-y-6"></div>
+            <img
+              src={bibek}
+              alt="Bibek Karki"
+              className="relative z-10 w-full h-auto object-cover rounded-sm border border-portfolio-border grayscale hover:grayscale-0 transition-all duration-500"
+            />
+          </div>
         </motion.div>
 
-        {/* Heading with waving emoji */}
-        <h2 className="text-5xl font-extrabold text-purple-700 dark:text-purple-400 mb-8 flex items-center gap-3">
-          About Me
-        </h2>
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8 }}
+          className="w-full md:w-1/2 flex flex-col gap-6"
+        >
+          <h2 className="text-sm font-medium text-portfolio-accent uppercase tracking-widest">
+            About Me
+          </h2>
+          <h3 className="text-4xl md:text-5xl font-bold text-portfolio-text-primary leading-tight">
+            Curious about systems beneath the interface.
+          </h3>
 
-        {/* About Paragraphs */}
-        <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-          Hello! I'm{" "}
-          <span className="font-semibold text-purple-600 dark:text-purple-400">
-            Bibek Karki
-          </span>
-          , a passionate Frontend Developer from Kathmandu, Nepal 🇳🇵. I
-          specialize in creating beautiful, responsive websites with a focus on
-          user experience.
-        </p>
-
-        <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-          Skilled in <span className="font-semibold">React</span>,
-          <span className="font-semibold"> TailwindCSS</span>,
-          <span className="font-semibold"> Redux</span>, and modern web
-          technologies. I love turning creative ideas into reality through clean
-          and efficient code!
-        </p>
-      </motion.div>
+          <div className="text-lg text-portfolio-text-secondary leading-relaxed space-y-6">
+            <p>
+              I'm a developer who enjoys understanding how things work beneath the interface. My journey started with frontend development, but my curiosity gradually expanded toward backend systems, databases, APIs, and the logic that powers real-world applications.
+            </p>
+            <p>
+              I enjoy working across the stack, learning new technologies, and turning ideas into software that people can actually use. Whether it's crafting a smooth user experience or architecting a robust database schema, I focus on building maintainable and scalable solutions.
+            </p>
+          </div>
+        </motion.div>
+      </div>
     </section>
   );
 };

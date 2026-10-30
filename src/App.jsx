@@ -1,32 +1,28 @@
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
-import Skills from "./components/Skills";
 import About from "./components/About";
+import Experience from "./components/Experience";
+import Skills from "./components/Skills";
+import Mindset from "./components/Mindset";
+import Exploring from "./components/Exploring";
 import Projects from "./components/Projects";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
-import ThemeToggle from "./components/ThemeToggle";
-import { useState } from "react";
-import { Toaster } from "react-hot-toast"; // ✨ add this
 
 function App() {
-  const [darkMode, setDarkMode] = useState(true);
-
   return (
-    <>
-      <div id="app-content" className={darkMode ? "dark" : ""}>
-        <Toaster position="top-center" reverseOrder={false} />
-        <Navbar />
-        <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
-
-        <Hero />
-        <About />
-        <Skills />
-        <Projects />
-        <Contact />
-        <Footer />
-      </div>
-    </>
+    <div id="app-content" className="bg-portfolio-main text-portfolio-text-primary font-sans">
+      <Navbar />
+      <Hero />
+      <About />
+      <Experience />
+      <Projects />
+      <Skills />
+      <Mindset />
+      <Exploring />
+      <Contact />
+      <Footer />
+    </div>
   );
 }
 
