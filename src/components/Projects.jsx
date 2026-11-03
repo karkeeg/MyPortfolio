@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { Github, ExternalLink, Folder } from "lucide-react";
 

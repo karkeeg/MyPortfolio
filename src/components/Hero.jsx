@@ -76,7 +76,9 @@ const Hero = () => {
             Let's Talk
           </a>
           <a
-            href="#"
+            href="/resume.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-block bg-transparent text-primary-dim hover:text-primary font-semibold py-3 px-8 rounded-full transition-colors"
           >
             Resume
