@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/static/css/main.3de94d85.css",
+    "main.js": "/static/js/main.2448bd11.js",
+    "static/js/453.2865e994.chunk.js": "/static/js/453.2865e994.chunk.js",
+    "static/media/bibek.jpg": "/static/media/bibek.225ea0ef3075672e6eec.jpg",
+    "static/media/Andika-Regular.ttf": "/static/media/Andika-Regular.7952c98861979c0798af.ttf",
+    "index.html": "/index.html",
+    "main.3de94d85.css.map": "/static/css/main.3de94d85.css.map",
+    "main.2448bd11.js.map": "/static/js/main.2448bd11.js.map",
+    "453.2865e994.chunk.js.map": "/static/js/453.2865e994.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.3de94d85.css",
+    "static/js/main.2448bd11.js"
+  ]
+}
