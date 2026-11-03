@@ -1,79 +1,121 @@
 import { motion } from "framer-motion";
-import { Link } from "react-scroll";
-import NetworkBackground from "./NetworkBackground";
+import { FaGithub, FaLinkedin } from "react-icons/fa";
 
 const Hero = () => {
   return (
     <section
       id="home"
-      className="min-h-screen flex flex-col justify-center relative px-6 md:px-12 bg-portfolio-main overflow-hidden pt-20"
+      className="h-screen bg-background relative flex items-center justify-center overflow-hidden px-6"
     >
-      <NetworkBackground />
-      {/* Background Subtle Gradient */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-portfolio-accent/5 blur-[120px] pointer-events-none" />
+      {/* Ambient background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent-glow rounded-full blur-[120px] opacity-20 pointer-events-none" />
 
-      <div className="max-w-4xl mx-auto w-full z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="flex flex-col gap-6"
+      {/* Content */}
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: { opacity: 0 },
+          visible: {
+            opacity: 1,
+            transition: {
+              staggerChildren: 0.15,
+            },
+          },
+        }}
+        className="relative z-10 flex flex-col items-center text-center max-w-4xl"
+      >
+        <motion.p
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0 },
+          }}
+          className="text-primary-dim text-lg md:text-xl font-medium tracking-wide uppercase mb-4"
         >
-          {/* Availability Indicator */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-portfolio-elevated border border-portfolio-border rounded-full w-max mb-4">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            <span className="text-xs font-medium text-portfolio-text-secondary uppercase tracking-wider">
-              Available for new opportunities
-            </span>
-          </div>
+          Bibek Karki
+        </motion.p>
 
-          {/* Headline */}
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-portfolio-text-primary leading-[1.1]">
-            Building digital <br className="hidden md:block" />
-            <span className="text-portfolio-text-muted">experiences & </span>
-            <span className="text-portfolio-accent italic font-medium">systems.</span>
-          </h1>
+        <motion.h1
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0 },
+          }}
+          className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-primary mb-6 tracking-tight"
+        >
+          Full-Stack Developer
+        </motion.h1>
 
-          {/* Introduction */}
-          <p className="text-lg md:text-xl text-portfolio-text-secondary max-w-2xl leading-relaxed mt-4">
-            I'm Bibek Karki, a Full-Stack Developer at NextWaveAI based in Kathmandu, Nepal. I enjoy building practical digital products, developing reliable backend systems, and turning complex ideas into intuitive software experiences.
-          </p>
+        <motion.p
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0 },
+          }}
+          className="text-lg md:text-xl text-primary-dim mb-10 max-w-2xl leading-relaxed"
+        >
+          I build scalable applications, craft intuitive frontend experiences, and architect robust backend systems that solve real-world problems.
+        </motion.p>
 
-          {/* CTAs */}
-          <div className="flex flex-wrap items-center gap-4 mt-8">
-            <Link
-              to="projects"
-              smooth={true}
-              duration={500}
-              className="px-6 py-3 bg-portfolio-text-primary text-portfolio-main font-semibold rounded-sm hover:bg-portfolio-accent transition-colors cursor-pointer"
-            >
-              Explore My Work
-            </Link>
-            <Link
-              to="contact"
-              smooth={true}
-              duration={500}
-              className="px-6 py-3 bg-transparent border border-portfolio-border text-portfolio-text-primary font-medium rounded-sm hover:bg-portfolio-elevated transition-colors cursor-pointer"
-            >
-              Let's Talk
-            </Link>
-          </div>
+        {/* CTA Buttons */}
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0 },
+          }}
+          className="flex flex-col sm:flex-row gap-4"
+        >
+          <a
+            href="#projects"
+            className="inline-block bg-primary text-background hover:bg-gray-200 font-semibold py-3 px-8 rounded-full shadow-lg transition-colors"
+          >
+            View Projects
+          </a>
+          <a
+            href="#contact"
+            className="inline-block bg-background-secondary border border-gray-800 text-primary hover:bg-gray-800 font-semibold py-3 px-8 rounded-full transition-colors glow-border"
+          >
+            Let's Talk
+          </a>
+          <a
+            href="#"
+            className="inline-block bg-transparent text-primary-dim hover:text-primary font-semibold py-3 px-8 rounded-full transition-colors"
+          >
+            Resume
+          </a>
         </motion.div>
-      </div>
+
+        {/* Social Icons */}
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0 },
+          }}
+          className="flex gap-6 mt-12"
+        >
+          <a
+            href="https://github.com/karkeeg"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary-dim hover:text-primary text-3xl transition-colors"
+          >
+            <FaGithub />
+          </a>
+          <a
+            href="https://www.linkedin.com/in/bibek-karki-b41703272/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary-dim hover:text-primary text-3xl transition-colors"
+          >
+            <FaLinkedin />
+          </a>
+        </motion.div>
+      </motion.div>
 
       {/* Scroll Indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1, duration: 1 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-portfolio-text-muted"
-      >
-        <span className="text-xs uppercase tracking-widest">Scroll</span>
-        <div className="w-[1px] h-12 bg-gradient-to-b from-portfolio-text-muted to-transparent"></div>
-      </motion.div>
+      <div className="absolute bottom-10 animate-bounce">
+        <div className="w-6 h-10 border-2 border-primary-dim rounded-full flex items-start justify-center p-1">
+          <div className="w-1.5 h-2 bg-primary rounded-full" />
+        </div>
+      </div>
     </section>
   );
 };

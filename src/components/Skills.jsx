@@ -1,86 +1,113 @@
 import { motion } from "framer-motion";
-import GeometricBackground from "./GeometricBackground";
+import {
+  FaReact,
+  FaNodeJs,
+  FaGithub,
+  FaDocker,
+  FaAws,
+} from "react-icons/fa";
+import {
+  SiTailwindcss,
+  SiRedux,
+  SiTypescript,
+  SiExpress,
+  SiMongodb,
+  SiNextdotjs,
+  SiPostgresql,
+  SiFastapi,
+  SiMysql,
+  SiNeo4J,
+  SiPrisma,
+  SiRedis,
+  SiVercel,
+  SiSupabase,
+  SiJsonwebtokens
+} from "react-icons/si";
 
-const skillsData = {
+const skillsByCategory = {
   Frontend: [
-    "React",
-    "Next.js",
-    "React Native",
-    "JavaScript",
-    "TypeScript",
-    "Tailwind CSS",
-    "Redux Toolkit",
-    "Zustand",
-    "Chakra UI"
+    { icon: FaReact, title: "React" },
+    { icon: SiNextdotjs, title: "Next.js" },
+    { icon: FaReact, title: "React Native" },
+    { icon: SiTypescript, title: "TypeScript" },
+    { icon: SiTailwindcss, title: "Tailwind CSS" },
   ],
   Backend: [
-    "Node.js",
-    "Express.js",
-    "FastAPI",
-    "REST APIs",
-    "Authentication & Authorization",
-    "JWT",
-    "Role-Based Access Control",
-    "Prisma",
-    "Zod"
+    { icon: FaNodeJs, title: "Node.js" },
+    { icon: SiExpress, title: "Express.js" },
+    { icon: SiFastapi, title: "FastAPI" },
   ],
-  "Databases & Services": [
-    "PostgreSQL",
-    "MongoDB",
-    "MySQL",
-    "Neo4j",
-    "Supabase",
-    "Firebase",
-    "Redis"
+  Database: [
+    { icon: SiPostgresql, title: "PostgreSQL" },
+    { icon: SiMongodb, title: "MongoDB" },
+    { icon: SiMysql, title: "MySQL" },
+    { icon: SiNeo4J, title: "Neo4j" },
   ],
-  "Tools & Workflow": [
-    "Git & GitHub",
-    "Docker",
-    "API integration & testing",
-    "Deployment workflows",
-    "Responsive development",
-    "Application debugging"
-  ]
+  "ORM & State": [
+    { icon: SiPrisma, title: "Prisma" },
+    { icon: SiRedux, title: "Redux Toolkit" },
+    { icon: null, title: "Zustand", textIcon: "🐻" },
+  ],
+  "Authentication & Security": [
+    { icon: SiJsonwebtokens, title: "JWT" },
+    { icon: null, title: "OAuth", textIcon: "🛡️" },
+    { icon: null, title: "RBAC", textIcon: "🔐" },
+    { icon: null, title: "Argon2", textIcon: "🔒" },
+  ],
+  "Infrastructure & Tools": [
+    { icon: FaDocker, title: "Docker" },
+    { icon: FaAws, title: "AWS" },
+    { icon: FaGithub, title: "Git & GitHub" },
+    { icon: SiRedis, title: "Redis" },
+    { icon: SiVercel, title: "Vercel" },
+    { icon: SiSupabase, title: "Supabase" },
+  ],
 };
+
+const SkillCard = ({ icon: Icon, title, textIcon }) => (
+  <motion.div
+    whileHover={{ y: -5 }}
+    className="bg-background-secondary border border-white/5 p-4 rounded-xl shadow-sm hover:shadow-blue-500/10 flex items-center gap-4 transition-all glow-border"
+  >
+    <div className="w-10 h-10 flex items-center justify-center text-2xl text-primary bg-white/5 rounded-lg">
+      {Icon ? <Icon /> : <span className="text-xl">{textIcon}</span>}
+    </div>
+    <h4 className="font-medium text-primary text-sm tracking-wide">{title}</h4>
+  </motion.div>
+);
 
 const Skills = () => {
   return (
-    <section id="skills" className="relative py-32 px-6 md:px-12 bg-portfolio-main overflow-hidden">
-      <GeometricBackground />
-      <div className="relative max-w-7xl mx-auto z-10">
+    <section id="skills" className="py-24 bg-background">
+      <div className="max-w-7xl mx-auto px-6">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8 }}
+          className="mb-16 text-center"
         >
-          <div className="mb-20 md:text-center">
-            <h2 className="text-sm font-medium text-portfolio-accent uppercase tracking-widest mb-4">
-              Technical Arsenal
-            </h2>
-            <h3 className="text-4xl md:text-5xl font-bold text-portfolio-text-primary">
-              Tools I Build With
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
-            {Object.entries(skillsData).map(([category, skills]) => (
-              <div key={category} className="flex flex-col gap-6">
-                <h4 className="text-xl font-semibold text-portfolio-text-primary border-b border-portfolio-border pb-4">
-                  {category}
-                </h4>
-                <ul className="space-y-4">
-                  {skills.map((skill) => (
-                    <li key={skill} className="text-portfolio-text-secondary flex items-center gap-3">
-                      <span className="w-1.5 h-1.5 rounded-full bg-portfolio-accent/50"></span>
-                      {skill}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-primary mb-4">Technical Arsenal</h2>
+          <p className="text-primary-dim text-lg">Technologies I leverage to build scalable software.</p>
         </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+          {Object.entries(skillsByCategory).map(([category, skills], idx) => (
+            <motion.div
+              key={category}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ delay: idx * 0.1 }}
+            >
+              <h3 className="text-xl font-semibold text-primary mb-6 border-b border-white/10 pb-2">{category}</h3>
+              <div className="flex flex-col gap-3">
+                {skills.map((skill, i) => (
+                  <SkillCard key={i} {...skill} />
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
