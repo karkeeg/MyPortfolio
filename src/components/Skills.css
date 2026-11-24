@@ -1,0 +1,106 @@
+/* Tech Arsenal — Solar System & Universe. All selectors are namespaced `ta-`. */
+
+.ta-root {
+  --acc: var(--ac, #a855f7);
+  font-family: Geist, Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: #ecedef;
+}
+.ta-root a { color: #d6d8dd; }
+.ta-root a:hover { color: #ffffff; }
+.ta-mono { font-family: "Geist Mono", ui-monospace, monospace; }
+
+@keyframes ta-spin { to { transform: rotate(360deg); } }
+@keyframes ta-spinr { to { transform: rotate(-360deg); } }
+@keyframes ta-breathe { 0%, 100% { transform: scale(1); opacity: 0.7; } 50% { transform: scale(1.16); opacity: 1; } }
+@keyframes ta-twinkle { 0%, 100% { opacity: 0.12; } 50% { opacity: 0.85; } }
+@keyframes ta-pkt { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -300; } }
+@keyframes ta-sweep { from { transform: translateX(-120%); } to { transform: translateX(520%); } }
+@keyframes ta-slidein { from { opacity: 0; transform: translateX(18px) scale(0.985); } to { opacity: 1; transform: none; } }
+@keyframes ta-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes ta-pulse { 0% { transform: scale(1); opacity: 0.95; } 100% { transform: scale(2); opacity: 0; } }
+@keyframes ta-blink { 50% { opacity: 0.25; } }
+
+/* ── orbital motion ── */
+.ta-orbit, .ta-ctr { transform-box: view-box; transform-origin: 0 0; animation-timing-function: linear; animation-iteration-count: infinite; }
+.ta-orbit { animation-name: ta-spin; }
+.ta-ctr { animation-name: ta-spinr; }
+.ta-paused .ta-orbit, .ta-paused .ta-ctr,
+.ta-stage:has(.ta-planet:hover) .ta-orbit, .ta-stage:has(.ta-planet:hover) .ta-ctr,
+.ta-stage:has(.ta-planet:focus-visible) .ta-orbit, .ta-stage:has(.ta-planet:focus-visible) .ta-ctr { animation-play-state: paused; }
+.ta-breathe { transform-box: view-box; transform-origin: 0 0; animation: ta-breathe 5.5s ease-in-out infinite; pointer-events: none; }
+.ta-tw { animation: ta-twinkle 4.2s ease-in-out infinite; }
+
+/* ── camera ── */
+.ta-scene { transform-box: view-box; transform-origin: 0 0; transition: transform 1.15s cubic-bezier(0.22, 1.16, 0.32, 1); }
+.ta-svgstage { transition: filter 0.55s ease; }
+.ta-moving .ta-svgstage { filter: blur(1.4px) brightness(1.35); }
+.ta-dragging .ta-scene { transition: none !important; }
+.ta-dragging .ta-svgstage, .ta-dragging .ta-bg, .ta-dragging .ta-starbody { cursor: grabbing !important; }
+
+/* ── realms, stars, planets ── */
+.ta-flare { opacity: 0; transition: opacity 0.45s ease; pointer-events: none; }
+.ta-realm.ta-hot .ta-flare, .ta-realm.ta-sel .ta-flare { opacity: 1; }
+.ta-realm { transition: opacity 0.6s ease; }
+.ta-realm.ta-dim { opacity: 0.2; }
+.ta-rsub { opacity: 0; transition: opacity 0.3s ease; }
+.ta-realm.ta-hot .ta-rsub, .ta-realm.ta-sel .ta-rsub { opacity: 1; }
+.ta-elabel { transition: opacity 0.5s ease; }
+.ta-elabel.ta-dim { opacity: 0.12; }
+.ta-plabel { opacity: 0; transition: opacity 0.4s ease; }
+.ta-zoomed .ta-realm.ta-sel .ta-plabel { opacity: 1; }
+.ta-zoomed .ta-realm.ta-sel .ta-planet:hover .ta-plabel { opacity: 0; }
+.ta-halo { opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
+.ta-realm.ta-hot .ta-halo, .ta-realm.ta-sel .ta-halo, .ta-planet:hover .ta-halo { opacity: 1; }
+.ta-selring { opacity: 0; pointer-events: none; }
+.ta-planet.ta-on .ta-selring { opacity: 1; transform-box: view-box; transform-origin: 0 0; animation: ta-pulse 1.9s ease-out infinite; }
+.ta-planet, .ta-starbody { cursor: pointer; outline: none; }
+.ta-starbody { cursor: grab; }
+.ta-planet:focus-visible .ta-hit, .ta-starbody:focus-visible .ta-hit { stroke: var(--acc); stroke-width: 1; }
+.ta-pkt { opacity: 0; animation: ta-pkt 3.4s linear infinite; transition: opacity 0.4s ease; }
+.ta-link.ta-hot .ta-pkt { opacity: 1; }
+.ta-bg { cursor: grab; }
+.ta-ptip { animation: ta-rise 0.22s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+
+/* ── inspector ── */
+.ta-insp { position: absolute; top: 16px; right: 16px; bottom: 16px; width: 348px; animation: ta-slidein 0.55s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+.ta-rise { animation: ta-rise 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+
+/* ── realm index rows ── */
+.ta-row { position: relative; isolation: isolate; }
+.ta-row::after { content: ""; position: absolute; inset: 0; background: radial-gradient(560px circle at var(--mx, 30%) var(--my, 50%), var(--glow), transparent 60%); opacity: 0; transition: opacity 0.35s ease; z-index: -1; pointer-events: none; }
+.ta-row::before { content: ""; position: absolute; left: 0; bottom: -1px; height: 1px; width: 100%; background: linear-gradient(90deg, var(--rc), transparent 85%); transform: scaleX(0); transform-origin: left; transition: transform 0.7s cubic-bezier(0.2, 0.9, 0.3, 1); pointer-events: none; }
+.ta-row:hover::after, .ta-row.ta-hot::after { opacity: 1; }
+.ta-row:hover::before, .ta-row.ta-hot::before { transform: scaleX(1); }
+.ta-row .ta-arr { transition: transform 0.35s ease, border-color 0.35s ease, color 0.35s ease; }
+.ta-row:hover .ta-arr, .ta-row.ta-hot .ta-arr { transform: translateX(3px); border-color: var(--rc); color: var(--rc); }
+.ta-row:hover .ta-rname, .ta-row.ta-hot .ta-rname { color: #ffffff; }
+.ta-rowg { display: grid; grid-template-columns: 56px minmax(220px, 1.05fr) minmax(0, 1.9fr) 96px; }
+
+/* ── toolbar ── */
+.ta-tab { position: relative; }
+.ta-tab::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 1px; background: var(--line); transition: background 0.25s ease; }
+.ta-tab:hover { color: #e6e8ec !important; }
+.ta-ib:hover { color: #f4f5f6 !important; background: rgba(255, 255, 255, 0.06) !important; }
+.ta-root button:focus-visible, .ta-root a:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+.ta-sweep { animation: ta-sweep 4.2s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+.ta-live { animation: ta-blink 2.2s ease-in-out infinite; }
+.ta-hscroll { scrollbar-width: none; }
+.ta-hscroll::-webkit-scrollbar { display: none; }
+
+@media (max-width: 900px) {
+  .ta-rowg { grid-template-columns: 36px minmax(0, 1fr); }
+  .ta-rowg .ta-c3 { grid-column: 2; }
+  .ta-rowg .ta-c4 { display: none !important; }
+  .ta-insp { position: relative; top: auto; right: auto; bottom: auto; width: auto; margin: 0 12px 12px; }
+  .ta-hud-r, .ta-hint { display: none !important; }
+}
+@media (max-width: 700px) {
+  .ta-mm { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ta-orbit, .ta-ctr, .ta-breathe, .ta-tw, .ta-pkt, .ta-sweep, .ta-live, .ta-planet.ta-on .ta-selring { animation-play-state: paused !important; }
+  .ta-scene { transition-duration: 0.01s; }
+  .ta-insp, .ta-rise { animation: none; }
+  .ta-moving .ta-svgstage { filter: none; }
+}

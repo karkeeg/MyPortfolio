@@ -21,3 +21,12 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Local dev documentation (not tracked)
+docs/
+
+# Design references
+Main.dc.html
+support.js
+design/
+
