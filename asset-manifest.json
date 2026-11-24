@@ -1,17 +1,19 @@
 {
   "files": {
-    "main.css": "/static/css/main.3de94d85.css",
-    "main.js": "/static/js/main.2448bd11.js",
+    "main.css": "/static/css/main.19b99b47.css",
+    "main.js": "/static/js/main.6e7956c0.js",
     "static/js/453.2865e994.chunk.js": "/static/js/453.2865e994.chunk.js",
-    "static/media/bibek.jpg": "/static/media/bibek.225ea0ef3075672e6eec.jpg",
-    "static/media/Andika-Regular.ttf": "/static/media/Andika-Regular.7952c98861979c0798af.ttf",
+    "static/media/airline.png": "/static/media/airline.d6ae925a76f71490241b.png",
+    "static/media/ecommerce.png": "/static/media/ecommerce.546a6ab5c40345a3ed9d.png",
+    "static/media/countries.png": "/static/media/countries.1447e85c10ea14e7bea7.png",
+    "static/media/myTodo.png": "/static/media/myTodo.a7f048796e332617dd8a.png",
     "index.html": "/index.html",
-    "main.3de94d85.css.map": "/static/css/main.3de94d85.css.map",
-    "main.2448bd11.js.map": "/static/js/main.2448bd11.js.map",
+    "main.19b99b47.css.map": "/static/css/main.19b99b47.css.map",
+    "main.6e7956c0.js.map": "/static/js/main.6e7956c0.js.map",
     "453.2865e994.chunk.js.map": "/static/js/453.2865e994.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.3de94d85.css",
-    "static/js/main.2448bd11.js"
+    "static/css/main.19b99b47.css",
+    "static/js/main.6e7956c0.js"
   ]
 }
